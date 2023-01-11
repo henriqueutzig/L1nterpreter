@@ -1,13 +1,10 @@
-module Types =  struct
-  type t =
-    | IntT
-    | BoolT
-    | FuncT
-    | PairT
-    | ListT 
-    | MaybeT
 
- 
-  (* let rec typeInfer () (e: expr) : t = match e with 
-    |  *)
-end
+type t =
+  | IntT
+  | BoolT
+  | FuncT
+  | PairT
+  | ListT 
+  | MaybeT
+(* let rec typeInfer () (e: expr) : t = match e with 
+  |  *)
