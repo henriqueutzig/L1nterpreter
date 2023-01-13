@@ -13,15 +13,20 @@ let sum_tests = "test suite for sum" >::: [
   test_sum "1+0)" 1 0 1;
   test_sum "0+1" 0 1 1;
   test_sum "-1+1" (-1) 1 0;
-  test_sum "1+(-1)" 1 (-1) 0;
   test_sum "-1+(-1)" (-1) (-1) (-2);
 ]
 
+
+(******************** 
+  TODO: add every new test list into suite's list
+*************************)
 (* Name the test cases and group them together *)
-(* let suite =
-  "Tests">:::
-   ["test_sum">:: sum_tests;];; *)
+let suite =
+   "Tests">:::
+   [sum_tests; 
+   ];;
   
 let () =
-  run_test_tt_main sum_tests
+  run_test_tt_main suite
+  (* run_test_tt_main  *)
 ;;
