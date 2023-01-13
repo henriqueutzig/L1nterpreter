@@ -1,2 +1,2 @@
 (test
- (name l1nterpreter))
+ (name tests))
