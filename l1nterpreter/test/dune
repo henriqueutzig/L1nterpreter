@@ -1,2 +1,3 @@
 (test
- (name l1nterpreter))
+ (name tests)
+ (libraries lib oUnit))

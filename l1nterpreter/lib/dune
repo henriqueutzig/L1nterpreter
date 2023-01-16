@@ -1,2 +1,4 @@
 (library
- (name l1nterpreter))
+ (name lib)
+ (modules Types Ops)
+)
