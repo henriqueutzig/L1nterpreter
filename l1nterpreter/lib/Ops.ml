@@ -1,4 +1,4 @@
-type operator =
+type op =
   | Sum
   | Diff
   | Mult
