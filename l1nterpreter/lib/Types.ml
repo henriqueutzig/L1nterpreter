@@ -1,4 +1,3 @@
-
 type t =
   | IntT
   | BoolT
@@ -6,5 +5,3 @@ type t =
   | PairT
   | ListT 
   | MaybeT
-(* let rec typeInfer () (e: expr) : t = match e with 
-  |  *)
