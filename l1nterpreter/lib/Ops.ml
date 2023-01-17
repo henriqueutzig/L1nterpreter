@@ -8,8 +8,8 @@ type op =
   | Leq
   | Greater
   | Geq
-  | OpAnd
-  | OPOr
+  | And
+  | Or
 
 type value = 
   | Numeric of int
