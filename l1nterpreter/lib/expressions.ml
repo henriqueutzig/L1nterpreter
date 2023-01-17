@@ -10,6 +10,8 @@ type exp =
   | Op     of exp * op * exp
   | If     of exp * exp * exp
   | Var    of var  (* x *)
+  (* application *)
+  | App    of exp * exp
   (* functions *)
   | Fn     of var * exp
   | Let    of var * exp * exp
