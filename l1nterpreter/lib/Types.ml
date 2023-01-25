@@ -1,7 +1,7 @@
-type t =
-  | IntT
-  | BoolT
-  | FuncT of t * t
-  | PairT
-  | ListT 
-  | MaybeT
+type exType =
+  | TyInt
+  | TyBool
+  | TyFunc of exType * exType
+  | TyPair
+  | TyList
+  | TyMaybe
