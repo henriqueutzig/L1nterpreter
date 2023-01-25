@@ -1,7 +1,7 @@
 type t =
   | IntT
   | BoolT
-  | FuncT
+  | FuncT of t * t
   | PairT
   | ListT 
   | MaybeT
