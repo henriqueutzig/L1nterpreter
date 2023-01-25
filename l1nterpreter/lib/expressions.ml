@@ -1,7 +1,24 @@
 include Ops;;
+include Types;;
 
 (* type varible *)
-type var = string
+type ident = string
+
+(* ****************************** AMBIENT/ENV ****************************** *)
+(* ambient/env type *)
+type tyEnv = (ident * expType) list
+
+(* Auxiliary ambient/env functions *)
+let updateEnv (env: tyEnv) (id: ident) (t: expType) : tyEnv =
+  (id, t) :: env
+
+(* Varible not declared exception *)
+exception VaribleNotDeclared;; 
+let rec lookUpEnv (env: tyEnv) (id: ident) : expType = match env with
+| (id', t') :: n -> if id' = id then t' else (lookUpEnv n id) 
+| [] -> raise VaribleNotDeclared
+(* ****************************** AMBIENT/ENV ****************************** *)
+
 
 (* type expression *)
 type exp = 
@@ -9,13 +26,13 @@ type exp =
   | Bool   of bool
   | Op     of exp * op * exp
   | If     of exp * exp * exp
-  | Var    of var  (* x *)
+  | Var    of ident  (* x *)
   (* application *)
   | App    of exp * exp
   (* functions *)
-  | Fn     of var * exp
-  | Let    of var * exp * exp
-  | LetRec of var * var * exp * exp
+  | Fn     of ident * exp
+  | Let    of ident * exp * exp
+  | LetRec of ident * ident * exp * exp
   (* pair *)
   | Pair   of exp * exp
   | Fst    of exp
@@ -34,25 +51,15 @@ type exp =
   | MatchNothing of exp * exp (* TODO:  match e1 with nothing ⇒ e2 | just x ⇒ e3*)
 
 
+
 type value = 
   | Numeric of int
   | Boolean of bool
-  | Closure of var * exp * ambient
-  | RecClosure of var * var * exp * ambient
-  and   ambient = (var * value) list
+  | Closure of ident * exp * tyEnv
+  | RecClosure of ident * ident * exp * tyEnv
 
-(* Varible not declared exception *)
-exception VaribleNotDeclared;;
-
-(* Auxiliary ambient functions *)
-let updateAmbient (amb: ambient) (x :var) (v :value) : ambient =
-  (x, v) :: amb
-
-let rec lookUpAmbient (amb: ambient) (x :var) : value = match amb with
-  | [] -> raise VaribleNotDeclared
-  | (var, value) :: t -> if var = x then value else (lookUpAmbient t x) 
-
-exception IncorretValueType
+(* binary ops  *)
+exception IncorretValueType;;
 
 let sum (x: value)(y: value) : value = match (x, y) with
   | (Numeric(x), Numeric(y)) -> Numeric(x+y)
