@@ -31,7 +31,7 @@ type exp =
   | App    of exp * exp
   (* functions *)
   | Fn     of ident * exp
-  | Let    of ident * exp * exp
+  | Let    of ident * expType * exp * exp
   | LetRec of ident * ident * exp * exp
   (* pair *)
   | Pair   of exp * exp

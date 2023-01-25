@@ -64,8 +64,23 @@ let rec typeInfer (env: tyEnv) (e: exp) : expType =  match e with
       | _ -> raise IncorretExpType
     )
   (* ========== TODO: Ap, Let, Fn, LetRec ============== *)
-  (* | Ap(e1, e2) ->
-    (match (typeInfer e1, typeInfer e2) with
-      | 
-    ) *)
-  (*| Fn() *)
+  | Let(id, t, e1, e2) -> 
+    (match (typeInfer env e1, typeInfer (updateEnv env id t) e2) with
+      | (t1, t2) -> t2
+    )
+  | Fn(id, e) ->
+    let t1 = lookUpEnv env id in
+    let t2 = typeInfer env e in
+      TyFunc(t1, t2)
+  | LetRec(fid, inputid, e1, e2) -> 
+    (
+      let ftype = (lookUpEnv env fid) in
+        let e2type = typeInfer (updateEnv env fid ftype) e2 in 
+          let inputtype = lookUpEnv env inputid in 
+            let e1type = typeInfer (updateEnv env inputid inputtype) e1 in 
+            match (ftype) with
+            | TyFunc(inputid, e1type) -> e2type
+            | _ -> raise IncorretExpType
+      (* match (lookUpType amb id, ty, typeInfer amb e1, typeInfer amb e2)
+      | (id', ty, e1', e2') -> e2' *)
+    )
