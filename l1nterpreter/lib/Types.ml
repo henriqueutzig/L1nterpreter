@@ -1,7 +1,7 @@
-type exType =
+type expType =
   | TyInt
   | TyBool
-  | TyFunc of exType * exType
+  | TyFunc of expType * expType
   | TyPair
-  | TyList
+  | TyList of expType
   | TyMaybe
