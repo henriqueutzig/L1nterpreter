@@ -78,7 +78,8 @@ let rec typeInfer (env: tyEnv) (e: exp) : expType =  match e with
           let inputtype = lookUpEnv env inputid in 
             let e1type = typeInfer (updateEnv env inputid inputtype) e1 in 
             match (ftype) with
-            | TyFunc(inputid, e1type) -> e2type
+            | TyFunc(inputtype', e1type') -> 
+              if ((inputtype' = inputtype) && (e1type' = e1type)) then e2type else raise IncorretExpType
             | _ -> raise IncorretExpType
       (* match (lookUpType amb id, ty, typeInfer amb e1, typeInfer amb e2)
       | (id', ty, e1', e2') -> e2' *)
@@ -107,4 +108,4 @@ let rec typeInfer (env: tyEnv) (e: exp) : expType =  match e with
      | TyPair(_, t2) -> t2
      | _ -> raise IncorretExpType
     )
-  | 
+  (* |  *)
