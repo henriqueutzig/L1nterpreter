@@ -2,6 +2,6 @@ type expType =
   | TyInt
   | TyBool
   | TyFunc of expType * expType
-  | TyPair
+  | TyPair of expType * expType
   | TyList of expType
   | TyMaybe
