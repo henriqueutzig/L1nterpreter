@@ -38,7 +38,7 @@ type exp =
   | Fst    of exp
   | Snd    of exp
   (* list *)
-  | Nil 
+  (* | Nil 
   | Concat of exp * exp  (* e1 :: e2 *)
   | Hd     of exp
   | Tl     of exp
@@ -48,7 +48,7 @@ type exp =
   (* Match with Nil *)
   | MatchNil of exp * exp  (* TODO:  match e1 with nil ⇒ e2 | x::xs ⇒ e3 *)
   (* Match with nothing *)
-  | MatchNothing of exp * exp (* TODO:  match e1 with nothing ⇒ e2 | just x ⇒ e3*)
+  | MatchNothing of exp * exp TODO:  match e1 with nothing ⇒ e2 | just x ⇒ e3 *)
 
 
 
