@@ -1,6 +1,7 @@
 include OUnit2;;
 include Lib.Ops;;
 include Lib.TypeInfer;;
+(* include Lib.Expressions;; *)
 
 (*======================= Ops Tests =======================*)
 (* SUM *)
@@ -56,15 +57,18 @@ let test_typeInfer name env exp out =
   name >:: (fun _ -> assert_equal out (typeInfer env exp))
 
 let typeInfer_tests = "typeInfer tests" >::: [
+  test_typeInfer "f(x,y) = x+y" 
+                [("x", TyInt);("y", TyInt)] 
+                (Fn("x", Fn("y", Op(Num(3), Sum, Num(4)))))
+                (TyFunc (TyInt, TyInt));
+  (* test_typeInfer "" ;
   test_typeInfer "" ;
   test_typeInfer "" ;
   test_typeInfer "" ;
   test_typeInfer "" ;
   test_typeInfer "" ;
   test_typeInfer "" ;
-  test_typeInfer "" ;
-  test_typeInfer "" ;
-  test_typeInfer "" ;
+  test_typeInfer "" ; *)
 ]
 (******************** 
   TODO: add every new test list into suite's list
@@ -75,6 +79,7 @@ let suite =
    [sum_tests; 
     diff_tests;
     mult_tests;
+    typeInfer_tests;
    ];;
   
 let () =
