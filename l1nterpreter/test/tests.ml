@@ -1,5 +1,6 @@
 include OUnit2;;
 include Lib.Ops;;
+include Lib.TypeInfer;;
 
 (*======================= Ops Tests =======================*)
 (* SUM *)
@@ -50,6 +51,21 @@ let mult_tests = "Mult tests" >::: [
   test_mult "-4*(-3)" (-4) (-3) 12;
 ]
 
+(* ********TYPEINFER******** *)
+let test_typeInfer name env exp out = 
+  name >:: (fun _ -> assert_equal out (typeInfer env exp))
+
+let typeInfer_tests = "typeInfer tests" >::: [
+  test_typeInfer "" ;
+  test_typeInfer "" ;
+  test_typeInfer "" ;
+  test_typeInfer "" ;
+  test_typeInfer "" ;
+  test_typeInfer "" ;
+  test_typeInfer "" ;
+  test_typeInfer "" ;
+  test_typeInfer "" ;
+]
 (******************** 
   TODO: add every new test list into suite's list
 *************************)
