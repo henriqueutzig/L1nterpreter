@@ -60,7 +60,7 @@ let typeInfer_tests = "typeInfer tests" >::: [
   test_typeInfer "f(x,y) = x+y" 
                 [("x", TyInt);("y", TyInt)] 
                 (Fn("x", Fn("y", Op(Num(3), Sum, Num(4)))))
-                (TyFunc (TyInt, TyInt));
+                (TyFunc (TyInt, TyFunc(TyInt, TyInt)));
   (* test_typeInfer "" ;
   test_typeInfer "" ;
   test_typeInfer "" ;
