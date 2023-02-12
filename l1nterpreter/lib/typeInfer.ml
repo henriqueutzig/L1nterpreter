@@ -64,7 +64,7 @@ let rec typeInfer (env: tyEnv) (e: exp) : expType =  match e with
       | TyBool -> TyBool
       | _ -> raise IncorretExpType
     )
-  (* Named func expression *)
+  (* Varible declaration *)
   | Let(id, t, e1, e2) -> 
     (match (typeInfer env e1, typeInfer (updateEnv env id t) e2) with
       | (_, t2) -> t2
