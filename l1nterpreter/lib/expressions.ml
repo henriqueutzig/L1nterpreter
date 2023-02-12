@@ -38,14 +38,14 @@ type exp =
   | Fst    of exp
   | Snd    of exp
   (* list *)
-  | Nil 
+  | Nil    of expType
   | Concat of exp * exp  (* e1 :: e2 *)
   | Hd     of exp
   | Tl     of exp
   | MatchNil of exp * exp * exp (* TODO:  match e1 with nil ⇒ e2 | x::xs ⇒ e3 *)
   (* option type *)
   | Just   of exp
-  | Nothing 
+  | Nothing of expType
   | MatchNothing of exp * exp * exp  (* TODO:  match e1 with nothing ⇒ e2 | just x ⇒ e3 *)
 
 
