@@ -4,4 +4,4 @@ type expType =
   | TyFunc of expType * expType
   | TyPair of expType * expType
   | TyList of expType
-  | TyMaybe
+  | TyMaybe of expType
