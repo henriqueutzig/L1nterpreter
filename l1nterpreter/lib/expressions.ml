@@ -38,17 +38,15 @@ type exp =
   | Fst    of exp
   | Snd    of exp
   (* list *)
-  (* | Nil 
+  | Nil 
   | Concat of exp * exp  (* e1 :: e2 *)
   | Hd     of exp
   | Tl     of exp
-  (* matchs *)
+  | MatchNil of exp * exp * exp (* TODO:  match e1 with nil ⇒ e2 | x::xs ⇒ e3 *)
+  (* option type *)
   | Just   of exp
   | Nothing 
-  (* Match with Nil *)
-  | MatchNil of exp * exp  (* TODO:  match e1 with nil ⇒ e2 | x::xs ⇒ e3 *)
-  (* Match with nothing *)
-  | MatchNothing of exp * exp TODO:  match e1 with nothing ⇒ e2 | just x ⇒ e3 *)
+  | MatchNothing of exp * exp * exp  (* TODO:  match e1 with nothing ⇒ e2 | just x ⇒ e3 *)
 
 
 
@@ -57,6 +55,10 @@ type value =
   | Boolean of bool
   | Closure of ident * exp * tyEnv
   | RecClosure of ident * ident * exp * tyEnv
+  | Nil of expType
+  | List of value * value
+  | Nothing of expType
+  | Just of value
 
 (* binary ops  *)
 exception IncorretValueType;;
