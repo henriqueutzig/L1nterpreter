@@ -102,7 +102,19 @@ let test_typeInfer name env exp (out:expType) =
   test_typeInfer "Concat (Num(10),Nil TyInt) is TyList(TyInt)"
   []
   (Concat(Num(10),(Nil TyInt)))
-  (TyList(TyInt))
+  (TyList(TyInt));
+  test_typeInfer "Concat(Num(20),Concat(Num(10),Nil TyInt)) is TyList(TyInt)"
+  []
+  (Concat(Num(20),Concat(Num(10),(Nil TyInt))))
+  (TyList(TyInt));
+  test_typeInfer "Head Concat(Num(10),Nil TyInt) is TyInt"
+  []
+  (Hd(Concat(Num(10),(Nil TyInt))))
+  (TyInt);
+  test_typeInfer "Tail Concat(Num(10),Nil TyInt) is TyList(TyInt)"
+  []
+  (Tl(Concat(Num(10),(Nil TyInt))))
+  (TyList(TyInt));
 
   (*test_typeInfer "" (*nome do teste *)
                 [] (* ambiente de test *)
