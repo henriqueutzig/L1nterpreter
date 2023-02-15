@@ -42,7 +42,7 @@ type exp =
   | Concat of exp * exp  (* e1 :: e2 *)
   | Hd     of exp
   | Tl     of exp
-  | MatchNil of exp * exp * exp (* TODO:  match e1 with nil ⇒ e2 | x::xs ⇒ e3 *)
+  | MatchList of exp * exp * exp * ident * ident (* TODO:  match e1 with nil ⇒ e2 | x::xs ⇒ e3 *)
   (* option type *)
   | Just   of exp
   | Nothing of expType
