@@ -79,10 +79,10 @@ let test_typeInfer name env exp (out:expType) =
                 [] (* ambiente de test *)
                 (Let("x", TyInt, Num(10), Var("x"))) (* expressão a ser testada*)
                 (TyInt); (* tipo esperado*)              
-  (* test_typeInfer "f(x,y) = x+y" 
+  test_typeInfer "f(x,y) = x+y" 
                 [("x", TyInt);("y", TyInt)] 
-                (Fn("x", Fn("y", Op(Num(3), Sum, Num(4)))))
-                (TyFunc (TyInt, TyFunc(TyInt, TyInt))); *)
+                (Fn("x", TyInt, Fn("y",TyInt, Op(Num(3), Sum, Num(4)))))
+                (TyFunc (TyInt, TyFunc(TyInt, TyInt)));
   test_typeInfer "Pair(10,Pair(true,20))" (* nome do teste *)
                 [] (* ambiente de test *)
                 (Pair(Num(10), Pair(Bool(true), Num(20)))) (* expressão a ser testada*)
