@@ -22,6 +22,7 @@ let rec lookUpEnv (env: tyEnv) (id: ident) : expType = match env with
 
 (* type expression *)
 type exp = 
+  | Ident  of ident
   | Num    of int
   | Bool   of bool
   | Op     of exp * op * exp
@@ -30,7 +31,7 @@ type exp =
   (* application *)
   | App    of exp * exp
   (* functions *)
-  | Fn     of ident * exp
+  | Fn     of ident * expType * exp
   | Let    of ident * expType * exp * exp
   | LetRec of ident * ident * exp * exp
   (* pair *)

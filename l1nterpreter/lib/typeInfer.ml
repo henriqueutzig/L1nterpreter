@@ -6,6 +6,7 @@ exception NotAList;;
 
 let rec typeInfer (env: tyEnv) (e: exp) : expType =  match e with
   (* Basic expressions *)
+  | Ident x -> lookUpEnv env x
   | Num  _ -> TyInt
   | Bool _ -> TyBool
   (* Op expressions *)
@@ -71,7 +72,7 @@ let rec typeInfer (env: tyEnv) (e: exp) : expType =  match e with
       | (_, t2) -> t2
     )
   (* Anonymous func expression *)
-  | Fn(id, e) ->
+  | Fn(id, _, _) ->
     let t1 = lookUpEnv env id in
     let t2 = typeInfer env e in
       TyFunc(t1, t2)
