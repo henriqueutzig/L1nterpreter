@@ -136,7 +136,7 @@ let rec typeInfer (env: tyEnv) (e: exp) : expType =  match e with
   | Just(e) -> 
     (let t = typeInfer env e in 
      TyMaybe(t))
-  | MatchNothing(e1, e2, e3) ->
+  | MatchOption(e1, e2, e3, _) ->
     (match (typeInfer env e1, typeInfer env e2, typeInfer env e3) with
       | (TyMaybe(_), t1, t2) -> if (t1 == t2) then t2 else raise IncorretExpType
       | _ -> raise IncorretExpType

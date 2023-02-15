@@ -119,6 +119,10 @@ let test_typeInfer name env exp (out:expType) =
               []
               (MatchList(Concat(Num(10),(Nil TyInt)), Bool(true), Bool(false),"x","xs"))
               (TyBool);
+  test_typeInfer "Match Nothing of TyInt is TyMaybe(TyInt)"
+              []
+              (Nothing(TyInt))
+              (TyMaybe(TyInt));
 
   (*test_typeInfer "" (*nome do teste *)
                 [] (* ambiente de test *)

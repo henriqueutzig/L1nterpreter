@@ -46,7 +46,7 @@ type exp =
   (* option type *)
   | Just   of exp
   | Nothing of expType
-  | MatchNothing of exp * exp * exp  (* TODO:  match e1 with nothing ⇒ e2 | just x ⇒ e3 *)
+  | MatchOption of exp * exp * exp * ident (* TODO:  match e1 with nothing ⇒ e2 | just x ⇒ e3 *)
 
 
 
