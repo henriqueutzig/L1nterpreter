@@ -123,7 +123,14 @@ let test_typeInfer name env exp (out:expType) =
               []
               (Nothing(TyInt))
               (TyMaybe(TyInt));
-
+  test_typeInfer "Match Just(True) is TyMaybe(TyBool)"
+              []
+              (Just(Bool(false)))
+              (TyMaybe(TyBool));
+  test_typeInfer "Match Just(Num(10)) with Nothing -> True / just x -> False is TyBool"
+              []
+              (MatchOption(Just(Num(10)), Bool(true), Bool(false),"x"))
+              (TyBool);
   (*test_typeInfer "" (*nome do teste *)
                 [] (* ambiente de test *)
                 () (* expressão a ser testada*)
