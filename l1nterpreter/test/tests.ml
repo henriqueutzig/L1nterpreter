@@ -73,7 +73,7 @@ let test_typeInfer name env exp (out:expType) =
                 (TyInt); (* tipo esperado*)
   test_typeInfer "fn x:Int = 10+x is of TyFunc(TyInt,TyInt)" (* nome do teste *)
                 [] (* ambiente de test *)
-                (Fn("x", TyInt, Op(Num(10),Sum,Ident("x")))) (* expressão a ser testada*)
+                (Fn("x", TyInt, Op(Num(10),Sum,Var("x")))) (* expressão a ser testada*)
                 (TyFunc(TyInt,TyInt)); (* tipo esperado*)  
   test_typeInfer "Let x:Int = 10 in x" (* nome do teste *)
                 [] (* ambiente de test *)
