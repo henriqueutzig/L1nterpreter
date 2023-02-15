@@ -2,6 +2,11 @@ include Types;;
 include Expressions;;
 
 exception IncorretExpType;;
+exception NotAList;;
+
+let _getListType (e:expType) = match e with
+| TyList e1 -> e1
+| _ -> raise NotAList
 
 let rec typeInfer (env: tyEnv) (e: exp) : expType =  match e with
   (* Basic expressions *)
@@ -113,10 +118,10 @@ let rec typeInfer (env: tyEnv) (e: exp) : expType =  match e with
      | _ -> raise IncorretExpType
     )
   (* List expressions *)
-  | Nil(t) -> TyNil(t)
+  | Nil(t) -> TyList(t)
   | Concat(e1,e2) ->
     (match (typeInfer env e1, typeInfer env e2) with
-      | (t1, t2) -> if(t1 == t2) then TyList(t2) else raise IncorretExpType
+      | (t1, t2) -> if(t1 == _getListType(t2)) then TyList(t1) else raise IncorretExpType
     )
   | Hd(e') -> 
     (match typeInfer env e' with 

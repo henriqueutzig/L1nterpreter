@@ -1,6 +1,7 @@
 include OUnit2;;
 include Lib.Ops;;
 include Lib.TypeInfer;;
+include Lib.ToString;;
 (* include Lib.Expressions;; *)
 
 (*======================= Ops Tests =======================*)
@@ -53,10 +54,15 @@ let mult_tests = "Mult tests" >::: [
 ]
 
 (* ********TYPEINFER******** *)
-let test_typeInfer name env exp out = 
-  name >:: (fun _ -> assert_equal out (typeInfer env exp))
+let test_typeInfer name env exp (out:expType) = 
+  let result = typeInfer env exp in
+  let title = Printf.sprintf "%s: Assert %s is equal to %s" name (toString out) (toString result) in
+  title >:: (fun _ -> assert_equal 
+  out (typeInfer env exp))
 
-let typeInfer_tests = "typeInfer tests" >::: [
+  
+
+  let typeInfer_tests = "typeInfer tests" >::: [
   test_typeInfer "if(true, 10, 20)" 
                 [] 
                 (If(Bool(true), Num(10), Num(20)))
@@ -85,6 +91,19 @@ let typeInfer_tests = "typeInfer tests" >::: [
                 [] (* ambiente de test *)
                 (Snd(Pair(Num(10), Pair(Bool(true), Num(20))))) (* expressão a ser testada*)
                 (TyPair(TyBool, TyInt)); (* tipo esperado*)
+  test_typeInfer "Nil" 
+              []
+              (Nil TyInt)
+              (TyList(TyInt));
+  test_typeInfer "Num(10) is TyInt" 
+              []
+              (Num(10))
+              (TyInt);
+  test_typeInfer "Concat (Num(10),Nil TyInt) is TyList(TyInt)"
+  []
+  (Concat(Num(10),(Nil TyInt)))
+  (TyList(TyInt))
+
   (*test_typeInfer "" (*nome do teste *)
                 [] (* ambiente de test *)
                 () (* expressão a ser testada*)
