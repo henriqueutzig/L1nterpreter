@@ -3,6 +3,7 @@ include Expressions;;
 
 exception IncorretExpType;;
 exception NotAList;;
+exception MismatchAppTypes;;
 
 let rec typeInfer (env: tyEnv) (e: exp) : expType =  match e with
   (* Basic expressions *)
@@ -63,6 +64,7 @@ let rec typeInfer (env: tyEnv) (e: exp) : expType =  match e with
     (match (lookUpEnv env x) with
       | TyInt  -> TyInt
       | TyBool -> TyBool
+      | TyFunc(t1,t2) -> TyFunc(t1,t2)
       | _ -> raise IncorretExpType
     )
   (* Varible declaration *)
@@ -75,25 +77,18 @@ let rec typeInfer (env: tyEnv) (e: exp) : expType =  match e with
     let t2 = typeInfer (updateEnv env id idType) exp in
       TyFunc(idType, t2)
   (* Recursion func expression *)
-  | LetRec(fid, inputid, e1, e2) -> 
-    (
-      let ftype = (lookUpEnv env fid) in
-        let e2type = typeInfer (updateEnv env fid ftype) e2 in 
-          let inputtype = lookUpEnv env inputid in 
-            let e1type = typeInfer (updateEnv env inputid inputtype) e1 in 
-            match (ftype) with
-            | TyFunc(inputtype', e1type') -> 
-              if ((inputtype' == inputtype) && (e1type' == e1type)) then e2type else raise IncorretExpType
-            | _ -> raise IncorretExpType
-      (* match (lookUpType amb id, ty, typeInfer amb e1, typeInfer amb e2)
-      | (id', ty, e1', e2') -> e2' *)
-    )
+  | LetRec(fId, fType, id, idType, e1, e2) -> 
+    let envWithRecFunc = updateEnv env fId fType in (
+    match fType with
+    | TyFunc(t1,t2) -> if (typeInfer (updateEnv envWithRecFunc id idType) e1 == t2 && t1 == idType) then typeInfer envWithRecFunc e2 else raise IncorretExpType
+    | _ -> raise IncorretExpType
+  )
   (* Application expression *)
   | App(e1, e2) ->
     (let t1 = typeInfer env e1 in
       let t2 = typeInfer env e2 in 
         match t1 with 
-         | TyFunc(t1', t2') -> if (t1' == t2) then t2' else raise IncorretExpType
+         | TyFunc(t1', t2') -> if (t1' == t2) then t2' else raise MismatchAppTypes
          | _ -> raise IncorretExpType
     )
   (* Pair expressions *)

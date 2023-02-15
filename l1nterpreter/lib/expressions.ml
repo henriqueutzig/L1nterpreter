@@ -32,7 +32,7 @@ type exp =
   (* functions *)
   | Fn     of ident * expType * exp
   | Let    of ident * expType * exp * exp
-  | LetRec of ident * ident * exp * exp
+  | LetRec of ident * expType * ident * expType * exp * exp
   (* pair *)
   | Pair   of exp * exp
   | Fst    of exp
