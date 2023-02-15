@@ -100,21 +100,25 @@ let test_typeInfer name env exp (out:expType) =
               (Num(10))
               (TyInt);
   test_typeInfer "Concat (Num(10),Nil TyInt) is TyList(TyInt)"
-  []
-  (Concat(Num(10),(Nil TyInt)))
-  (TyList(TyInt));
+              []
+              (Concat(Num(10),(Nil TyInt)))
+              (TyList(TyInt));
   test_typeInfer "Concat(Num(20),Concat(Num(10),Nil TyInt)) is TyList(TyInt)"
-  []
-  (Concat(Num(20),Concat(Num(10),(Nil TyInt))))
-  (TyList(TyInt));
+              []
+              (Concat(Num(20),Concat(Num(10),(Nil TyInt))))
+              (TyList(TyInt));
   test_typeInfer "Head Concat(Num(10),Nil TyInt) is TyInt"
-  []
-  (Hd(Concat(Num(10),(Nil TyInt))))
-  (TyInt);
+              []
+              (Hd(Concat(Num(10),(Nil TyInt))))
+              (TyInt);
   test_typeInfer "Tail Concat(Num(10),Nil TyInt) is TyList(TyInt)"
-  []
-  (Tl(Concat(Num(10),(Nil TyInt))))
-  (TyList(TyInt));
+              []
+              (Tl(Concat(Num(10),(Nil TyInt))))
+              (TyList(TyInt));
+  test_typeInfer "Match Concat(Num(10),Nil TyInt) with nil -> True / x::xs -> False is TyBool"
+              []
+              (MatchList(Concat(Num(10),(Nil TyInt)), Bool(true), Bool(false),"x","xs"))
+              (TyBool);
 
   (*test_typeInfer "" (*nome do teste *)
                 [] (* ambiente de test *)
