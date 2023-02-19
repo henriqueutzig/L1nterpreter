@@ -1,10 +1,8 @@
-
-type t =
-  | IntT
-  | BoolT
-  | FuncT
-  | PairT
-  | ListT 
-  | MaybeT
-(* let rec typeInfer () (e: expr) : t = match e with 
-  |  *)
+type expType =
+  | TyInt
+  | TyBool
+  | TyFunc of expType * expType
+  | TyPair of expType * expType
+  | TyList of expType
+  | TyNil  of expType
+  | TyMaybe of expType

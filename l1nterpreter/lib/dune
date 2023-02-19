@@ -1,4 +1,3 @@
 (library
  (name lib)
- (modules Types Ops)
-)
+ (modules Types Ops TypeInfer Expressions toString))
