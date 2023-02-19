@@ -2,6 +2,7 @@ include OUnit2
 include Lib.Ops
 include Lib.TypeInfer
 include Lib.ToString
+include Lib.Eval
 
 (* include Lib.Expressions;; *)
 
@@ -191,10 +192,53 @@ let typeInfer_tests =
                        ();(* tipo esperado*) *)
        ]
 
+
+(* ********EVAL******** *)
+let test_eval name env exp (out : value) =
+  let result = eval env exp in
+  let title = name
+    (* Printf.sprintf "%s: Assert %s is equal to %s" name (toString out)
+      (toString result) *)
+  in
+  title >:: fun _ -> assert_equal out result
+
+let eval_tests =
+  "eval tests"
+  >::: [
+         test_eval "Num(10)" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Num(10)) (* expressão a ser testada*)
+                       (Numeric(10));(* tipo esperado*) 
+          test_eval "Num(-102)" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Num(-102)) (* expressão a ser testada*)
+                       (Numeric(-102));(* tipo esperado*) 
+          test_eval "Bool(true)" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Bool(true)) (* expressão a ser testada*)
+                       (Boolean(true));(* tipo esperado*) 
+          test_eval "Bool(false))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Bool(false)) (* expressão a ser testada*)
+                       (Boolean(false));(* tipo esperado*)
+          test_eval "Var(x) = 10" (*nome do teste *)
+                       [("x", Numeric(10))] (* ambiente de test *)
+                       (Var("x")) (* expressão a ser testada*)
+                       (Numeric(10));(* tipo esperado*)
+          test_eval "Var(x) = false" (*nome do teste *)
+                       [("x", Boolean(false))] (* ambiente de test *)
+                       (Var("x")) (* expressão a ser testada*)
+                       (Boolean(false));(* tipo esperado*)  
+          test_eval "(Numeric(10) Sum Numeric(-2))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Op(Num(10), Sum, Num(-2))) (* expressão a ser testada*)
+                       (Numeric(8));(* tipo esperado*) 
+       ]
+
 (********************
     TODO: add every new test list into suite's list
   *************************)
 (* Name the test cases and group them together *)
-let suite = "Tests" >::: [ sum_tests; diff_tests; mult_tests; typeInfer_tests ]
+let suite = "Tests" >::: [ sum_tests; diff_tests; mult_tests; typeInfer_tests; eval_tests ]
 let () = run_test_tt_main suite
 (* run_test_tt_main  *)
