@@ -295,7 +295,7 @@ let eval_tests =
                        (Boolean(false));(* tipo esperado*)
           test_eval "(Boolean(false) opOr Boolean(false))" (*nome do teste *)
                        [] (* ambiente de test *)
-                       (Op(Bool(false), And, Bool(false))) (* expressão a ser testada*)
+                       (Op(Bool(false), Or, Bool(false))) (* expressão a ser testada*)
                        (Boolean(false));(* tipo esperado*) 
           test_eval "(Boolean(false) opAnd Boolean(true))" (*nome do teste *)
                        [] (* ambiente de test *)
