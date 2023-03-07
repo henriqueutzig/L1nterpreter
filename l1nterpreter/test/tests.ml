@@ -301,6 +301,14 @@ let eval_tests =
                        [] (* ambiente de test *)
                        (Op(Boolean(false), opOr, Boolean(true))) (* expressão a ser testada*)
                        (Boolean(true));(* tipo esperado*)
+          test_eval "(If Boolean(true) then Num(1) else Num(0))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (If(Boolean(true), Num(1), Num(0))) (* expressão a ser testada*)
+                       (Num(1));(* tipo esperado*)
+          test_eval "(If Boolean(false) then Num(1) else Num(0))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (If(Boolean(false), Num(1), Num(0))) (* expressão a ser testada*)
+                       (Num(0));(* tipo esperado*)
        ]
 
 (********************
