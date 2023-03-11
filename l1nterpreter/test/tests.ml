@@ -309,6 +309,10 @@ let eval_tests =
                        [] (* ambiente de test *)
                        (If(Bool(false), Num(1), Num(0))) (* expressão a ser testada*)
                        (Numeric(0));(* tipo esperado*)
+          test_eval "(Just (If Boolean(false) then Num(1) else Num(0)))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Just(If(Bool(false), Num(1), Num(0)))) (* expressão a ser testada*)
+                       (Just(Numeric(0)));(* tipo esperado*)
        ]
 
 (********************

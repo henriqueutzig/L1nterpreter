@@ -18,6 +18,7 @@ let rec lookUpValEnv (env: valEnv) (id: ident) : value = match env with
 exception IncorrectExpresionType;;
 
 let rec eval (env: valEnv) (e: exp) : value = match e with
+  (* Value rules *)
   | Num v -> Numeric(v)
   | Bool v -> Boolean(v)
   | Var(x) -> (lookUpValEnv env x)
@@ -33,10 +34,12 @@ let rec eval (env: valEnv) (e: exp) : value = match e with
   | Op (x1,Geq,x2) -> (geq (eval env x1) (eval env x2))
   | Op (x1,And,x2) -> (opAnd (eval env x1) (eval env x2))
   | Op (x1,Or,x2) -> (opOr (eval env x1) (eval env x2))
-  (* If rules *)
+  (* If rule *)
   | If (e1,e2,e3) -> 
     (match (eval env e1) with
         | Boolean(true) -> (eval env e2)
         | Boolean(false) -> (eval env e3)
         | _ -> raise IncorrectExpresionType)
+  (* Just rule *)
+  | Just e -> Just (eval env e)
   | _ -> failwith "pattern matching not exaustive"
