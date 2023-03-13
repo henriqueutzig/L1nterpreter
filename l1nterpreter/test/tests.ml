@@ -309,7 +309,19 @@ let eval_tests =
                        [] (* ambiente de test *)
                        (If(Bool(false), Num(1), Num(0))) (* expressão a ser testada*)
                        (Numeric(0));(* tipo esperado*)
-       ]
+          test_eval "Let x:int = 10 in -5 + x" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Let("x", TyInt, Num(10), Op(Num(-5), Sum, Var("x")))) (* expressão a ser testada*)
+                       (Numeric(5));(* tipo esperado*)
+          test_eval "Let x:bool = false in y or x" (*nome do teste *)
+                       [("y", Boolean(true))] (* ambiente de test *)
+                       (Let("x", TyBool, Bool(false), Op(Var("y"), Or, Var("x")))) (* expressão a ser testada*)
+                       (Boolean(true));(* tipo esperado*)
+          test_eval "Let x:bool = false in (y <= z) and x" (*nome do teste *)
+                       [("y", Numeric(10)); ("z", Numeric(12))] (* ambiente de test *)
+                       (Let("x", TyBool, Bool(true), Op((Op(Var("y"), Leq, Var("z"))), And, Var("x")))) (* expressão a ser testada*)
+                       (Boolean(true));(* tipo esperado*)
+          ]
 
 (********************
     TODO: add every new test list into suite's list

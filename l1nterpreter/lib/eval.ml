@@ -16,6 +16,7 @@ let rec lookUpValEnv (env: valEnv) (id: ident) : value = match env with
 (* ****************************** AMBIENT/ENV ****************************** *)
 
 exception IncorrectExpresionType;;
+exception ApplicationWNoFunc;;
 
 let rec eval (env: valEnv) (e: exp) : value = match e with
   | Num v -> Numeric(v)
@@ -39,4 +40,15 @@ let rec eval (env: valEnv) (e: exp) : value = match e with
         | Boolean(true) -> (eval env e2)
         | Boolean(false) -> (eval env e3)
         | _ -> raise IncorrectExpresionType)
+  (* Let  *)
+  | Let (x, _, e1, e2) -> 
+    (let env' : valEnv = (updateValEnv env x (eval env e1)) in
+      (eval env' e2))
+  (* APP *)
+  (* | App(e1, e2) -> 
+    (match ((eval env e1), (eval env e2)) with
+      | (Closure(x, e, env), v) -> (eval (updateValEnv env x v) e)
+      | (RecClosure(f, x, e, env), v) -> (eval (updateValEnv env x v) e)
+      | _ -> raise ApplicationWNoFunc
+    ) *)
   | _ -> failwith "pattern matching not exaustive"
