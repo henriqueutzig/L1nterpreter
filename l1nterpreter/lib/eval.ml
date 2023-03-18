@@ -71,12 +71,12 @@ let rec eval (env: valEnv) (e: exp) : value = match e with
   | Pair(e1, e2) -> Pair((eval env e1), (eval env e2))
   | Fst(e) -> 
     (match (eval env e) with
-      | Pair(v1, v2) -> v1
+      | Pair(v1, _) -> v1
       | _ -> raise IncorrectExpresionType
     )
   | Snd(e) ->
     (match (eval env e) with
-      | Pair(v1, v2) -> v2
+      | Pair(_, v2) -> v2
       | _ -> raise IncorrectExpresionType
     )
   | _ -> failwith "pattern matching not exaustive"
