@@ -329,6 +329,15 @@ let eval_tests =
                        [("y", Numeric(10)); ("z", Numeric(12))] (* ambiente de test *)
                        (Let("x", TyBool, Bool(true), Op((Op(Var("y"), Leq, Var("z"))), And, Var("x")))) (* expressão a ser testada*)
                        (Boolean(true));(* tipo esperado*)
+          test_eval "fn x:Int = 10+x -> <x, 10+x, env>" (* nome do teste *)
+                       [] (* ambiente de test *)
+                       (Fn ("x", TyInt, Op (Num 10, Sum, Var "x")))
+                       (* expressão a ser testada*)
+                       ((Closure("x", Op (Num 10, Sum, Var "x"), [])));
+          test_eval "f(x,y) = x+y"
+                       [ ("x", Numeric(10)); ("y", Numeric(2))]
+                       (Fn ("x", TyInt, Fn ("y", TyInt, Op (Num 3, Sum, Num 4))))
+                       (Closure("x", Fn ("y", TyInt, Op (Num 3, Sum, Num 4)), [ ("x", Numeric(10)); ("y", Numeric(2))]));
           ]
 
 (********************

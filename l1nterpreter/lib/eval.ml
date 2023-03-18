@@ -49,6 +49,8 @@ let rec eval (env: valEnv) (e: exp) : value = match e with
   | Let (x, _, e1, e2) -> 
     (let env' : valEnv = (updateValEnv env x (eval env e1)) in
       (eval env' e2))
+  (* Fn rule *)
+  | Fn (x, _, e') -> (Closure(x, e', env))
   (* APP *)
   (* | App(e1, e2) -> 
     (match ((eval env e1), (eval env e2)) with
