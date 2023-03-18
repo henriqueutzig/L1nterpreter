@@ -17,6 +17,7 @@ let rec lookUpValEnv (env: valEnv) (id: ident) : value = match env with
 
 exception IncorrectExpresionType;;
 exception ApplicationWNoFunc;;
+exception GetElementOfEmptyList;;
 
 let rec eval (env: valEnv) (e: exp) : value = match e with
   (* Value rules *)
@@ -82,4 +83,16 @@ let rec eval (env: valEnv) (e: exp) : value = match e with
   (* List rules *)
   | Nil(t) -> Nil(t)
   | Concat(e1,e2) -> List((eval env e1), (eval env e2)) (* WARNNING: check tests for possible problem *)
+  | Hd(e') -> 
+    (match (eval env e') with
+      | List(v1, _) -> v1
+      | Nil(_) -> raise GetElementOfEmptyList
+      | _ -> raise IncorrectExpresionType
+    )
+  | Tl(e') -> 
+      (match (eval env e') with
+        | List(_, v2) -> v2
+        | Nil(_) -> raise GetElementOfEmptyList
+        | _ -> raise IncorrectExpresionType
+      )
   | _ -> failwith "pattern matching not exaustive"

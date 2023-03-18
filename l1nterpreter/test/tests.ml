@@ -385,6 +385,19 @@ let eval_tests =
                        []
                        (Concat(Num(10), Concat(Num(20), Num(30))))
                        (List(Numeric(10), List(Numeric(20), Numeric(30))));
+          (* ^^^^^^^^^^^^ *)
+          test_eval "Hd(10::20::30::nil)"
+                       []
+                       (Hd(Concat(Num(10), Concat(Num(20), Concat(Num(30), Nil(TyInt))))))
+                       (Numeric(10));
+          test_eval "Tl(10::20::30::nil)"
+                       []
+                       (Tl(Concat(Num(10), Concat(Num(20), Concat(Num(30), Nil(TyInt))))))
+                       (List(Numeric(20), List(Numeric(30), Nil(TyInt))));
+          test_eval "Tl(10::nil)"
+                       []
+                       (Tl(Concat(Num(10), Nil(TyInt))))
+                       (Nil(TyInt));
           ]
 
 (********************
