@@ -372,6 +372,19 @@ let eval_tests =
                        []
                        (Snd(Pair(If(Bool(true), Num(1), Num(0)), If(Bool(false), Num(1), Num(0)))))
                        (Numeric(0));
+          test_eval "Nil(int)"
+                       []
+                       (Nil(TyInt))
+                       (Nil(TyInt));
+          (* WARNNING: following tests show possible problem *)
+          test_eval "10::20::30::nil"
+                       []
+                       (Concat(Num(10), Concat(Num(20), Concat(Num(30), Nil(TyInt)))))
+                       (List(Numeric(10), List(Numeric(20), List(Numeric(30), Nil(TyInt)))));
+          test_eval "10::20::30"
+                       []
+                       (Concat(Num(10), Concat(Num(20), Num(30))))
+                       (List(Numeric(10), List(Numeric(20), Numeric(30))));
           ]
 
 (********************

@@ -79,4 +79,7 @@ let rec eval (env: valEnv) (e: exp) : value = match e with
       | Pair(_, v2) -> v2
       | _ -> raise IncorrectExpresionType
     )
+  (* List rules *)
+  | Nil(t) -> Nil(t)
+  | Concat(e1,e2) -> List((eval env e1), (eval env e2)) (* WARNNING: check tests for possible problem *)
   | _ -> failwith "pattern matching not exaustive"
