@@ -43,7 +43,9 @@ let rec eval (env: valEnv) (e: exp) : value = match e with
         | _ -> raise IncorrectExpresionType)
   (* Just rule *)
   | Just e -> Just (eval env e)
-  (* Let  *)
+  (* Nothing rule *)
+  | Nothing t -> Nothing t
+  (* Let  rule *)
   | Let (x, _, e1, e2) -> 
     (let env' : valEnv = (updateValEnv env x (eval env e1)) in
       (eval env' e2))
