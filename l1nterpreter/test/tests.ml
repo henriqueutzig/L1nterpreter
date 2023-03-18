@@ -360,6 +360,18 @@ let eval_tests =
                        [("y", Numeric(2))]
                        (App(Fn ("x", TyInt, Op (Var("x"), Sum, Var("y"))), Num(12)))
                        (Numeric(14));
+          test_eval "(If Boolean(true) then Num(1) else Num(0), If Boolean(false) then Num(1) else Num(0))"
+                       []
+                       (Pair(If(Bool(true), Num(1), Num(0)), If(Bool(false), Num(1), Num(0))))
+                       (Pair(Numeric(1), Numeric(0)));
+          test_eval "fst (If Boolean(true) then Num(1) else Num(0), If Boolean(false) then Num(1) else Num(0))"
+                       []
+                       (Fst(Pair(If(Bool(true), Num(1), Num(0)), If(Bool(false), Num(1), Num(0)))))
+                       (Numeric(1));
+          test_eval "snd (If Boolean(true) then Num(1) else Num(0), If Boolean(false) then Num(1) else Num(0))"
+                       []
+                       (Snd(Pair(If(Bool(true), Num(1), Num(0)), If(Bool(false), Num(1), Num(0)))))
+                       (Numeric(0));
           ]
 
 (********************

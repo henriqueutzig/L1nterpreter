@@ -55,6 +55,7 @@ type value =
   | Boolean of bool
   | Closure of ident * exp * ((ident * value) list)
   | RecClosure of ident * ident * exp * ((ident * value) list)
+  | Pair   of value * value
   | Nil of expType
   | List of value * value
   | Nothing of expType

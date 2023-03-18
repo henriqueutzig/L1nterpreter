@@ -67,4 +67,16 @@ let rec eval (env: valEnv) (e: exp) : value = match e with
       | (RecClosure(f, x, e, env), v) -> (eval (updateValEnv (updateValEnv env x v) f (RecClosure(f, x, e, env))) e)
       | _ -> raise ApplicationWNoFunc
     )
+  (* Pairs rules *)
+  | Pair(e1, e2) -> Pair((eval env e1), (eval env e2))
+  | Fst(e) -> 
+    (match (eval env e) with
+      | Pair(v1, v2) -> v1
+      | _ -> raise IncorrectExpresionType
+    )
+  | Snd(e) ->
+    (match (eval env e) with
+      | Pair(v1, v2) -> v2
+      | _ -> raise IncorrectExpresionType
+    )
   | _ -> failwith "pattern matching not exaustive"
