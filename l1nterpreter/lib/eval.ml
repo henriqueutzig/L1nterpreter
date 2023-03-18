@@ -45,6 +45,13 @@ let rec eval (env: valEnv) (e: exp) : value = match e with
   | Just e -> Just (eval env e)
   (* Nothing rule *)
   | Nothing t -> Nothing t
+  (* Pattern Matching - Maybe T expressions *)
+  | MatchOption(e1, e2, e3, x) -> 
+    (match (eval env e1) with
+      | Nothing(_) -> (eval env e2)
+      | Just(x') -> (eval (updateValEnv env x x') e3)
+      | _ -> raise IncorrectExpresionType
+    )
   (* Let  rule *)
   | Let (x, _, e1, e2) -> 
     (let env' : valEnv = (updateValEnv env x (eval env e1)) in

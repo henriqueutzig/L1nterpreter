@@ -317,6 +317,14 @@ let eval_tests =
                        [] (* ambiente de test *)
                        (Nothing TyInt) (* expressão a ser testada*)
                        (Nothing TyInt);(* tipo esperado*)
+          test_eval "match Noting int with nothing => Num(0) | just x => x+10"
+                       []
+                       (MatchOption(Nothing(TyInt), Num(0), Op(Var("x"), Sum, Num(10)), "x"))
+                       (Numeric(0));
+          test_eval "match Just(2) with nothing => Num(0) | just x => x+10"
+                       []
+                       (MatchOption(Just(Num(2)), Num(0), Op(Var("x"), Sum, Num(10)), "x"))
+                       (Numeric(12));
           test_eval "Let x:int = 10 in -5 + x" (*nome do teste *)
                        [] (* ambiente de test *)
                        (Let("x", TyInt, Num(10), Op(Num(-5), Sum, Var("x")))) (* expressão a ser testada*)
