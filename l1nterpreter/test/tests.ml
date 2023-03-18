@@ -398,6 +398,18 @@ let eval_tests =
                        []
                        (Tl(Concat(Num(10), Nil(TyInt))))
                        (Nil(TyInt));
+          test_eval "Match Tl(10::nil) with Nil => -1 | x::xs => x"
+                       []
+                       (MatchList(Tl(Concat(Num(10), Nil(TyInt))), Num(-1), Var("X"), "x", "xs"))
+                       (Numeric(-1));  
+          test_eval "Match (10::nil) with Nil => -1 | x::xs => x"
+                       []
+                       (MatchList(Concat(Num(10), Nil(TyInt)), Num(-1), Var("x"), "x", "xs"))
+                       (Numeric(10));
+          test_eval "Match (10::nil) with Nil => -1 | x::xs => xs"
+                       []
+                       (MatchList((Concat(Num(10), Nil(TyInt))), Num(-1), Var("xs"), "x", "xs"))
+                       (Nil(TyInt));               
           ]
 
 (********************

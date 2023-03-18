@@ -95,4 +95,10 @@ let rec eval (env: valEnv) (e: exp) : value = match e with
         | Nil(_) -> raise GetElementOfEmptyList
         | _ -> raise IncorrectExpresionType
       )
-  | _ -> failwith "pattern matching not exaustive"
+  | MatchList(e1, e2, e3, x, xs) -> 
+    (match (eval env e1) with
+      | Nil(_) -> (eval env e2)
+      | List(x', xs') -> (eval (updateValEnv (updateValEnv env x x') xs xs') e3)
+      | _ -> raise IncorrectExpresionType
+    )
+  (* | _ -> failwith "pattern matching not exaustive" *)
