@@ -51,11 +51,13 @@ let rec eval (env: valEnv) (e: exp) : value = match e with
       (eval env' e2))
   (* Fn rule *)
   | Fn (x, _, e') -> (Closure(x, e', env))
+  (* LetRec rule *)
+  | LetRec(f, _, x, _, e1, e2) -> (eval (updateValEnv env f (RecClosure(f, x, e1, env))) e2)
   (* APP *)
-  (* | App(e1, e2) -> 
+  | App(e1, e2) -> 
     (match ((eval env e1), (eval env e2)) with
       | (Closure(x, e, env), v) -> (eval (updateValEnv env x v) e)
-      | (RecClosure(f, x, e, env), v) -> (eval (updateValEnv env x v) e)
+      | (RecClosure(f, x, e, env), v) -> (eval (updateValEnv (updateValEnv env x v) f (RecClosure(f, x, e, env))) e)
       | _ -> raise ApplicationWNoFunc
-    ) *)
+    )
   | _ -> failwith "pattern matching not exaustive"

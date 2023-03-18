@@ -338,6 +338,20 @@ let eval_tests =
                        [ ("x", Numeric(10)); ("y", Numeric(2))]
                        (Fn ("x", TyInt, Fn ("y", TyInt, Op (Num 3, Sum, Num 4))))
                        (Closure("x", Fn ("y", TyInt, Op (Num 3, Sum, Num 4)), [ ("x", Numeric(10)); ("y", Numeric(2))]));
+          test_eval "let rec fat: int -> int = fn x: int => if(x==1, 1, x * fat (x-1))"
+                       []
+                       (LetRec("fat", TyFunc(TyInt, TyInt), "x", TyInt,
+                          If(Op(Var("x"), Eq, Num(1)),
+                              Num(1),
+                              Op(Var "x", Mult, App(Var("fat"), Op(Var("x"), Diff, Num(1))))
+                          ),
+                          App(Var("fat"), Num(3))
+                       ))
+                       (Numeric(6));
+          test_eval "(fn x:Int => x+y) 12"
+                       [("y", Numeric(2))]
+                       (App(Fn ("x", TyInt, Op (Var("x"), Sum, Var("y"))), Num(12)))
+                       (Numeric(14));
           ]
 
 (********************
