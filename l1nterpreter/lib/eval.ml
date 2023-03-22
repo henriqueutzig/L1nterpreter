@@ -82,7 +82,16 @@ let rec eval (env: valEnv) (e: exp) : value = match e with
     )
   (* List rules *)
   | Nil(t) -> Nil(t)
-  | Concat(e1,e2) -> List((eval env e1), (eval env e2)) (* WARNNING: check tests for possible problem *)
+  | Concat(e1,e2) -> List((eval env e1), (eval env e2))
+    (* let v1 = (eval env e1) in
+      let v2 = (eval env e2) in 
+      (match v2 with 
+        | List(_, _) -> List(v1, v2)
+        | Numeric(_) -> List(v1, List(v2, Nil(TyInt)))
+        | Boolean(_) -> List(v1, List(v2, Nil(TyBool)))
+        | _ -> failwith "error list"
+      ) *)
+    (* List((eval env e1), (eval env e2)) WARNNING: check tests for possible problem *)
   | Hd(e') -> 
     (match (eval env e') with
       | List(v1, _) -> v1

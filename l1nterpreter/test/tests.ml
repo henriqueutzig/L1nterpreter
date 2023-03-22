@@ -71,6 +71,9 @@ let test_typeInfer name env exp (out : expType) =
       (toString result)
   in
   title >:: fun _ -> assert_equal out (typeInfer env exp)
+let test_typeInfer_Error _ env exp (out : expType) =
+  let _ = typeInfer env exp in
+  fun _ -> (assert_raises IncorretExpType (fun _-> (typeInfer env exp)) )
 
 let typeInfer_tests =
   "typeInfer tests"
@@ -118,6 +121,9 @@ let typeInfer_tests =
            (TyPair (TyBool, TyInt));
          (* tipo esperado*)
          test_typeInfer "Nil" [] (Nil TyInt) (TyList TyInt);
+         test_typeInfer_Error "10::20::30"
+                       []
+                       (Concat(Num(10), Concat(Num(20), Num(30))));
          test_typeInfer "Num(10) is TyInt" [] (Num 10) TyInt;
          test_typeInfer "Concat (Num(10),Nil TyInt) is TyList(TyInt)" []
            (Concat (Num 10, Nil TyInt))
