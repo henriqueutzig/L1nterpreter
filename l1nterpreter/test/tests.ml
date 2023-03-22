@@ -71,9 +71,8 @@ let test_typeInfer name env exp (out : expType) =
       (toString result)
   in
   title >:: fun _ -> assert_equal out (typeInfer env exp)
-let test_typeInfer_Error _ env exp (out : expType) =
-  let _ = typeInfer env exp in
-  fun _ -> (assert_raises IncorretExpType (fun _-> (typeInfer env exp)) )
+let test_typeInfer_Error name env exp  =
+  name >:: fun _ -> assert_raises IncorretExpType (fun _-> (typeInfer env exp)) 
 
 let typeInfer_tests =
   "typeInfer tests"
