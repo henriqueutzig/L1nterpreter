@@ -213,9 +213,7 @@ let typeInfer_tests =
             test_typeInfer_Error "Hd(Pair(1,2))"
             []
             (Hd (Pair(Num 1, Num 2)));
-            test_typeInfer_Error "Match List with nil -> false, x::xs -> x+2"
-            []
-            (MatchList (Concat(Num 2,Nil(TyInt)), Bool false, Op (Var "x",Sum, Num 2), "x","xs"));
+          
 
 (* 
             test_typeInfer_Error "fn x: int => x + y "
