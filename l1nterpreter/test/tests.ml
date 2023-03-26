@@ -235,6 +235,10 @@ let test_eval name env exp (out : value) =
   in
   title >:: fun _ -> assert_equal out result
 
+  let test_eval_error name env exp  =
+  name >:: fun _ -> assert_raises IncorrectExpresionType (fun _-> (eval env exp)) 
+
+
 let eval_tests =
   "eval tests"
   >::: [
@@ -442,7 +446,13 @@ let eval_tests =
           test_eval "Match (10::nil) with Nil => -1 | x::xs => xs"
                        []
                        (MatchList((Concat(Num(10), Nil(TyInt))), Num(-1), Var("xs"), "x", "xs"))
-                       (Nil(TyInt));               
+                       (Nil(TyInt));
+          test_eval_error "If 2 then 2 else 4 | TypeInfer deve pegar"
+          []
+          (If (Num 2, Num 2, Num 4));
+          test_eval_error "MatchOption Num1, Num2, Num3 | TypeInfer deve pegar"
+          []
+          (MatchOption (Num 2, Num 3, Num 4, "x")) ;              
           ]
 
 (********************
