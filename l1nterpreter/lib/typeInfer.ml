@@ -120,11 +120,15 @@ let rec typeInfer (env: tyEnv) (e: exp) : expType =  match e with
       | _ -> raise IncorretExpType
     )
   | Tl(e') -> typeInfer env e'
-  | MatchList(e1, e2, e3,_,_) -> 
-      (match (typeInfer env e1, typeInfer env e2, typeInfer env e3) with
+  | MatchList(e1, e2, e3,head,tail) -> 
+    (match e1 with
+    | Concat(x,xs) -> (
+      (match (typeInfer env e1, typeInfer env e2, typeInfer (updateEnv (updateEnv env head (typeInfer env x)) tail (typeInfer env xs)) e3) with
         | (TyList(_), t1, t2) -> if (t1==t2) then t2 else raise IncorretExpType
         | _ -> raise IncorretExpType
-      )
+      )    )
+    | _ -> raise IncorretExpType)
+
   (* Option type expressions *)
   | Nothing(t) -> TyMaybe(t)
   | Just(e) -> 

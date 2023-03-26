@@ -120,9 +120,6 @@ let typeInfer_tests =
            (TyPair (TyBool, TyInt));
          (* tipo esperado*)
          test_typeInfer "Nil" [] (Nil TyInt) (TyList TyInt);
-         test_typeInfer_Error "10::20::30"
-                       []
-                       (Concat(Num(10), Concat(Num(20), Num(30))));
          test_typeInfer "Num(10) is TyInt" [] (Num 10) TyInt;
          test_typeInfer "Concat (Num(10),Nil TyInt) is TyList(TyInt)" []
            (Concat (Num 10, Nil TyInt))
@@ -190,7 +187,40 @@ let typeInfer_tests =
                        (Var "x", Mult, App (Var "fat", Op (Var "x", Diff, Num 1)))
                    ),
                  App (Var "fat", Num 5) ))
-            TyInt
+            TyInt;
+            (* Testes de Erro no TypeInfer *)
+            test_typeInfer_Error "10::20::30"
+            []
+            (Concat(Num(10), Concat(Num(20), Num(30))));
+            test_typeInfer_Error "if 1 then true else false"
+            []
+            (If (Num 1,Bool true, Bool false));
+            test_typeInfer_Error "if true then 1 else false"
+            []
+            (If (Bool true,Num 1, Bool false));
+            test_typeInfer_Error "true + 2"
+            []
+            (Op (Bool true,Sum, Num 2));
+            test_typeInfer_Error "true and 2"
+            []
+            (Op (Bool true,And, Num 2));
+            test_typeInfer_Error "Pair(true,2+true)"
+            []
+            (Pair (Bool true, Op (Num 2, Sum, Bool true)));
+            test_typeInfer_Error "Fst(List(2::nil)"
+            []
+            (Fst (Concat(Num 2, Nil TyInt)));
+            test_typeInfer_Error "Hd(Pair(1,2))"
+            []
+            (Hd (Pair(Num 1, Num 2)));
+            test_typeInfer_Error "Match List with nil -> false, x::xs -> x+2"
+            []
+            (MatchList (Concat(Num 2,Nil(TyInt)), Bool false, Op (Var "x",Sum, Num 2), "x","xs"));
+
+(* 
+            test_typeInfer_Error "fn x: int => x + y "
+            []
+            (Fn ("x", TyInt, Op(Var "x", Sum, Var "y"))); *)
          (*test_typeInfer "" (*nome do teste *)
                        [] (* ambiente de test *)
                        () (* expressão a ser testada*)
