@@ -3,6 +3,7 @@ include Lib.Ops
 include Lib.TypeInfer
 include Lib.ToString
 include Lib.Eval
+include Lib.Execute
 
 (* include Lib.Expressions;; *)
 
@@ -455,10 +456,22 @@ let eval_tests =
           (MatchOption (Num 2, Num 3, Num 4, "x")) ;              
           ]
 
+
+let test_run name exp exp_value =
+  name >:: fun _ -> assert_equal exp_value (run exp)
+
+let run_tests =
+  "run tests"
+  >::: [
+    test_run "If True And False Then 2 Else 3"
+    (If (Op(Bool true, And, Bool false), Num 2, Num 3))
+    (Numeric 3)
+  ]
+
 (********************
     TODO: add every new test list into suite's list
   *************************)
 (* Name the test cases and group them together *)
-let suite = "Tests" >::: [ sum_tests; diff_tests; mult_tests; typeInfer_tests; eval_tests ]
+let suite = "Tests" >::: [ sum_tests; diff_tests; mult_tests; typeInfer_tests; eval_tests ; run_tests]
 let () = run_test_tt_main suite
 (* run_test_tt_main  *)
