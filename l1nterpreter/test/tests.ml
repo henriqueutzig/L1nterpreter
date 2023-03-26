@@ -460,12 +460,17 @@ let eval_tests =
 let test_run name exp exp_value =
   name >:: fun _ -> assert_equal exp_value (run exp)
 
+  let test_run_error name exp =
+    name >:: fun _ -> assert_raises IncorretExpType (fun _ -> (run exp))
+
 let run_tests =
   "run tests"
   >::: [
     test_run "If True And False Then 2 Else 3"
     (If (Op(Bool true, And, Bool false), Num 2, Num 3))
-    (Numeric 3)
+    (Numeric 3);
+    test_run_error "If 2 Then 3 Else"
+    (If (Num 2, Num 2, Num 3))
   ]
 
 (********************
