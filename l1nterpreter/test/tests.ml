@@ -564,6 +564,40 @@ let eval_tests =
                        []
                        (MatchList((Concat(Num(10), Nil(TyInt))), Num(-1), Var("xs"), "x", "xs"))
                        (Nil(TyInt));
+          test_eval ""
+          []
+          (
+            LetRec(
+            "lookup",
+            TyFunc(TyList(TyPair(TyInt,TyInt)),TyFunc(TyInt, TyMaybe(TyInt))),
+           "l",
+            TyList(TyPair(TyInt,TyInt)),
+            Fn(
+              "key",
+              TyInt,
+              MatchList(
+                Var "l",
+                Nothing(TyInt),
+                If(
+                  Op(Fst(Var "x"),Eq,Var "key"),
+                  Just(Snd(Var "x")),
+                  App(App(Var "lookup", Var ("xs")), Var "key")
+                ),
+                "x",
+                "xs"
+            )),
+            App(App(Var "lookup",Concat(
+              Pair(Num 1, Num 10), 
+              Concat(
+                Pair(Num 2, Num 20), 
+                Concat(
+                  Pair(Num 3, Num 30),Nil(TyPair(TyInt,TyInt))
+                  )
+                  )
+            )
+              ), Num 2 )))
+          (Just(Numeric(20)));
+
           test_eval_error "If 2 then 2 else 4 | TypeInfer deve pegar"
           []
           (If (Num 2, Num 2, Num 4));
