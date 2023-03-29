@@ -189,6 +189,122 @@ let typeInfer_tests =
                    ),
                  App (Var "fat", Num 5) ))
             TyInt;
+            
+            test_typeInfer
+            "Test App"
+            [("lookup", TyFunc(TyList(TyPair(TyInt,TyInt)),TyMaybe(TyInt)));
+            ("xs",TyList(TyPair(TyInt,TyInt)))]
+                 ( App(Var "lookup", Var ("xs")))
+            (TyMaybe TyInt);
+            
+            test_typeInfer
+            "Test Nothing"
+            [("x",TyPair(TyInt,TyInt))]
+            (Nothing(TyInt))
+            (TyMaybe TyInt);
+
+            test_typeInfer 
+            "Test Inner part of let rec"
+            [("lookup", TyFunc(TyList(TyPair(TyInt,TyInt)),TyFunc(TyInt, TyMaybe(TyInt))));
+            ("l",TyList(TyPair(TyInt,TyInt)));
+            ("key",TyInt)]
+            (MatchList (
+                  Var "l",
+                  Nothing(TyInt),
+                  If(
+                    Op(Fst(Var "x"),Eq,Var "key"),
+                    Just(Snd(Var "x")),
+                    App(App(Var "lookup", Var ("xs")), Var "key")
+                    ),
+                  "x",
+                  "xs"
+            ))
+            (TyMaybe TyInt);
+
+            test_typeInfer 
+            "Test Fn"
+            [("lookup", TyFunc(TyList(TyPair(TyInt,TyInt)),TyFunc(TyInt, TyMaybe(TyInt))));
+            ("l",TyList(TyPair(TyInt,TyInt)));]
+            (Fn(
+              "key",
+              TyInt,
+              MatchList(
+                Var "l",
+                Nothing(TyInt),
+                If(
+                  Op(Fst(Var "x"),Eq,Var "key"),
+                  Just(Snd(Var "x")),
+                  App(App(Var "lookup", Var ("xs")), Var "key")
+                ),
+                "x",
+                "xs"
+            )))
+            (TyFunc(TyInt, TyMaybe TyInt));
+
+            test_typeInfer "Test Concat"
+            []
+                (Concat(
+                  Pair(Num 3, Num 30),Nil(TyPair(TyInt,TyInt))
+                  ))
+            (TyList (TyPair (TyInt, TyInt)));
+
+            test_typeInfer "Test Inner Application"
+            [("lookup", TyFunc(TyList(TyPair(TyInt,TyInt)),TyFunc(TyInt, TyMaybe(TyInt))))]
+            (App(App(Var "lookup",
+             Concat(
+                Pair(Num 1, Num 10), 
+                Concat(
+                  Pair(Num 2, Num 20), 
+                  Concat(
+                    Pair(Num 3, Num 30),Nil(TyPair(TyInt,TyInt))
+                    )
+                    )
+              )
+                ), Num 2 ))
+              (TyMaybe TyInt);
+
+
+            test_typeInfer 
+              "let rec lookup: (int x int) list -> int -> maybe int =
+                fn l: (int x int) list => fn key: int =>
+                    match l with
+                      nil => nothing
+                    | x :: xs => if (fst x) = key
+                                 then Just (snd x)
+                                 else (lookup xs key)
+            in lookup [(1,10),(2,20), (3,30)]  2"
+            []
+            (LetRec(
+              "lookup",
+              TyFunc(TyList(TyPair(TyInt,TyInt)),TyFunc(TyInt, TyMaybe(TyInt))),
+             "l",
+              TyList(TyPair(TyInt,TyInt)),
+              Fn(
+                "key",
+                TyInt,
+                MatchList(
+                  Var "l",
+                  Nothing(TyInt),
+                  If(
+                    Op(Fst(Var "x"),Eq,Var "key"),
+                    Just(Snd(Var "x")),
+                    App(App(Var "lookup", Var ("xs")), Var "key")
+                  ),
+                  "x",
+                  "xs"
+              )),
+              App(App(Var "lookup",Concat(
+                Pair(Num 1, Num 10), 
+                Concat(
+                  Pair(Num 2, Num 20), 
+                  Concat(
+                    Pair(Num 3, Num 30),Nil(TyPair(TyInt,TyInt))
+                    )
+                    )
+              )
+                ), Num 2 )
+            ))
+            (TyMaybe (TyInt));
             (* Testes de Erro no TypeInfer *)
             test_typeInfer_Error "10::20::30"
             []
@@ -448,6 +564,40 @@ let eval_tests =
                        []
                        (MatchList((Concat(Num(10), Nil(TyInt))), Num(-1), Var("xs"), "x", "xs"))
                        (Nil(TyInt));
+          test_eval ""
+          []
+          (
+            LetRec(
+            "lookup",
+            TyFunc(TyList(TyPair(TyInt,TyInt)),TyFunc(TyInt, TyMaybe(TyInt))),
+           "l",
+            TyList(TyPair(TyInt,TyInt)),
+            Fn(
+              "key",
+              TyInt,
+              MatchList(
+                Var "l",
+                Nothing(TyInt),
+                If(
+                  Op(Fst(Var "x"),Eq,Var "key"),
+                  Just(Snd(Var "x")),
+                  App(App(Var "lookup", Var ("xs")), Var "key")
+                ),
+                "x",
+                "xs"
+            )),
+            App(App(Var "lookup",Concat(
+              Pair(Num 1, Num 10), 
+              Concat(
+                Pair(Num 2, Num 20), 
+                Concat(
+                  Pair(Num 3, Num 30),Nil(TyPair(TyInt,TyInt))
+                  )
+                  )
+            )
+              ), Num 2 )))
+          (Just(Numeric(20)));
+
           test_eval_error "If 2 then 2 else 4 | TypeInfer deve pegar"
           []
           (If (Num 2, Num 2, Num 4));
