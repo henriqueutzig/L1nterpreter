@@ -12,8 +12,9 @@ let rec toString (exp:expType):string = match exp with
 | TyMaybe (e1) -> Printf.sprintf "TyMaybe(%s)" (toString e1)
 
 
-let rec opToString (operation:op):string = match operation with 
+let  opToString (operation:op):string = match operation with 
 | _ -> Printf.sprintf "Not implemented yet"
+
 
 
 let rec expToString (exp:exp):string = match exp with

@@ -1,7 +1,6 @@
 include Lib;;
 include Execute;;
-include ToString;;
+include Lib.ToString;;
 
-
-
-
+print_endline "";;
+print_endline (expToString((Fst (Concat(Num 2, Nil TyInt)))));;
