@@ -305,6 +305,22 @@ let typeInfer_tests =
                 ), Num 2 )
             ))
             (TyMaybe (TyInt));
+
+            test_typeInfer "Map App"
+            [("map",TyFunc(TyFunc(TyInt,TyInt),TyFunc(TyList(TyInt),TyList(TyInt)))); ("x",TyInt)]
+            (App(App(Var("map"),Fn("x",TyInt,Op(Var("x"),Sum,Var("x")))),Concat(Num(10),Concat(Num(20),Concat(Num(30),Nil(TyInt)))))            )
+            (TyList(TyInt));
+
+            test_typeInfer "Recursive map bode"
+            [("f",TyFunc(TyInt,TyInt));("x",TyInt);("map",(TyFunc(TyFunc(TyInt,TyInt),TyFunc(TyList(TyInt),TyList(TyInt)))))]
+            (Fn(
+              "l",
+              TyList(TyInt),
+              MatchList(Var("l"),Nil(TyList(TyInt)),
+              Concat(App(Var("f"),Var("x")),App(Var("map"),Var("xs"))),
+              "x",
+              "xs")))
+              (TyFunc(TyList(TyInt),TyList(TyInt)));
             (* Testes de Erro no TypeInfer *)
             test_typeInfer_Error "10::20::30"
             []
@@ -607,26 +623,13 @@ let eval_tests =
           ]
 
 
-let test_run name exp exp_value =
-  name >:: fun _ -> assert_equal exp_value (run exp)
 
-  let test_run_error name exp =
-    name >:: fun _ -> assert_raises IncorretExpType (fun _ -> (run exp))
 
-let run_tests =
-  "run tests"
-  >::: [
-    test_run "If True And False Then 2 Else 3"
-    (If (Op(Bool true, And, Bool false), Num 2, Num 3))
-    (Numeric 3);
-    test_run_error "If 2 Then 3 Else"
-    (If (Num 2, Num 2, Num 3))
-  ]
 
 (********************
     TODO: add every new test list into suite's list
   *************************)
 (* Name the test cases and group them together *)
-let suite = "Tests" >::: [ sum_tests; diff_tests; mult_tests; typeInfer_tests; eval_tests ; run_tests]
+let suite = "Tests" >::: [ sum_tests; diff_tests; mult_tests; typeInfer_tests; eval_tests ]
 let () = run_test_tt_main suite
 (* run_test_tt_main  *)

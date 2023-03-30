@@ -121,7 +121,7 @@ let rec typeInfer (env: tyEnv) (e: exp) : expType =  match e with
   | MatchList(e1, e2, e3,x_ident,xs_ident) -> (match typeInfer env e1 with 
      | TyList(x) ->
       ( match (typeInfer env e2, typeInfer (updateEnv (updateEnv env x_ident x) xs_ident (typeInfer env e1)) e3) with
-        | (t1, t2) -> if (t1==t2) then t2 else t2
+        | (t1, t2) -> if (t1=t2) then t2 else raise MismatchMatchTypes 
       )
       | _ -> raise IncorretExpType)
   (* Option type expressions *)
