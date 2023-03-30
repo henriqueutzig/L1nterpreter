@@ -43,16 +43,17 @@ run ( (
 let foo: int --> int = fn y:int => x + y in
 let x: int = 5
 in   foo 10 *)
-    run(Let("x",TyInt,Num(2),
-    Let("foo",TyFunc(TyInt,TyInt),
-    Fn("y",TyInt,Op(Var("x"),Sum,Var("y"))),
-    Let("x",TyInt,Num(5),App(Var("foo"),Num(10)))
+    run(
+      Let("x",TyInt,Num(2),
+        Let("foo",TyFunc(TyInt,TyInt),
+          Fn("y",TyInt,Op(Var("x"),Sum,Var("y"))),
+          Let("x",TyInt,Num(5),App(Var("foo"),Num(10)))
     )));;
 
     run(Let("x",TyInt,Num(2),
-    Let("foo",TyFunc(TyInt,TyInt),
-    Fn("y",TyInt,Op(Var("x"),Sum,Var("y"))),
-    Let("x",TyInt,Num(5),Var("foo"))
+      Let("foo",TyFunc(TyInt,TyInt),
+        Fn("y",TyInt,Op(Var("x"),Sum,Var("y"))),
+        Let("x",TyInt,Num(5),Var("foo"))
     )));;
 
 
