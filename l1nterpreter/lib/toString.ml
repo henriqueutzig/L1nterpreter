@@ -20,26 +20,22 @@ let rec expToString (exp:exp):string = match exp with
   | Num(x) -> Printf.sprintf "%d" x
   | Bool(x)   -> Printf.sprintf "%b" x
   | Op(x1,op,x2) -> Printf.sprintf "%s %s %s" (expToString x1) (opToString op) (expToString x2)
-  | _ -> Printf.sprintf "Not implemented"
-  (* | If     of exp * exp * exp
-  | Var    of ident  (* x *)
-  (* application *)
-  | App    of exp * exp
-  (* functions *)
-  | Fn     of ident * expType * exp
-  | Let    of ident * expType * exp * exp
-  | LetRec of ident * expType * ident * expType * exp * exp
-  (* pair *)
-  | Pair   of exp * exp
-  | Fst    of exp
-  | Snd    of exp
-  (* list *)
-  | Nil    of expType
-  | Concat of exp * exp  (* e1 :: e2 *)
-  | Hd     of exp
-  | Tl     of exp
-  | MatchList of exp * exp * exp * ident * ident (* TODO:  match e1 with nil ⇒ e2 | x::xs ⇒ e3 *)
-  (* option type *)
-  | Just   of exp
-  | Nothing of expType
-  | MatchOption of exp * exp * exp * ident TODO:  match e1 with nothing ⇒ e2 | just x ⇒ e3 *)
+  | If(x1,x2,x3) -> Printf.sprintf "If (%s) then (%s) else (%s)" (expToString x1) (expToString x2) (expToString x3)  
+  | Var(x) -> Printf.sprintf "Var(%s)" x
+  | App(x1,x2) -> Printf.sprintf "App %s to %s" (expToString x1) (expToString x2)
+  | Fn(ident,exptype,exp) -> Printf.sprintf "fn %s : %s => {%s} " ident (toString exptype) (expToString exp)
+  | Let(ident,expType,exp1,exp2) -> Printf.sprintf "let %s:%s=%s in %s" ident (toString expType) (expToString exp1) (expToString exp2)
+  | LetRec(ident,expType,ident2,expType2,exp1,exp2) -> Printf.sprintf "let rec %s:%s = fn %s:%s => %s in %s" 
+      ident (toString expType) ident2 (toString expType2) (expToString exp1) (expToString exp2)
+  | Pair(x1,x2) -> Printf.sprintf "Pair(%s x %s)" (expToString x1) (expToString x2)
+  | Fst(x) -> Printf.sprintf "Fst %s" (expToString x)
+  | Snd(x) -> Printf.sprintf "Snd %s" (expToString x)
+  | Nil(_) -> Printf.sprintf "Nil"
+  | Concat(x1,x2) -> Printf.sprintf "[%s :: %s]" (expToString x1) (expToString x2)
+  | Hd(x) -> Printf.sprintf "Hd %s" (expToString x)
+  | Tl(x) -> Printf.sprintf "Tl %s" (expToString x)
+  | MatchList(e1,e2,e3,x,xs) -> Printf.sprintf "match %s with nil => %s | %s::%s => %s" (expToString e1) (expToString e2) x xs (expToString e3)
+  | Just(x) -> Printf.sprintf "Just(%s)" (expToString x)
+  | Nothing(_) -> Printf.sprintf "Nothing"
+  | MatchOption(e1,e2,e3,x) -> Printf.sprintf "match %s with nothing => %s | Just(%s) => %s" (expToString e1) (expToString e2) x  (expToString e3)
+
