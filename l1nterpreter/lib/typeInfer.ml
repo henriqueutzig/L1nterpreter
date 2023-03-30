@@ -4,6 +4,7 @@ include Expressions;;
 exception IncorretExpType;;
 exception NotAList;;
 exception MismatchAppTypes;;
+exception MismatchMatchTypes;;
 
 let rec typeInfer (env: tyEnv) (e: exp) : expType =  match e with
   (* Basic expressions *)
@@ -57,15 +58,12 @@ let rec typeInfer (env: tyEnv) (e: exp) : expType =  match e with
   (* IF expression *)
   | If (e1, e2, e3) ->
     (match (typeInfer env e1, typeInfer env e2, typeInfer env e3) with
-      (TyBool, t2, t3) when t2 == t3 -> t2
+      (TyBool, t2, t3) when t2 = t3 -> t2
       | _ -> raise IncorretExpType)
   (* Varible declaration *)
   | Var(x) -> 
     (match (lookUpEnv env x) with
-      | TyInt  -> TyInt
-      | TyBool -> TyBool
-      | TyFunc(t1,t2) -> TyFunc(t1,t2)
-      | _ -> raise IncorretExpType
+      | x -> x
     )
   (* Varible declaration *)
   | Let(id, t, e1, e2) -> 
@@ -80,7 +78,7 @@ let rec typeInfer (env: tyEnv) (e: exp) : expType =  match e with
   | LetRec(fId, fType, id, idType, e1, e2) -> 
     let envWithRecFunc = updateEnv env fId fType in (
     match fType with
-    | TyFunc(t1,t2) -> if (typeInfer (updateEnv envWithRecFunc id idType) e1 == t2 && t1 == idType) then typeInfer envWithRecFunc e2 else raise IncorretExpType
+    | TyFunc(t1,t2) -> if (typeInfer (updateEnv envWithRecFunc id idType) e1 = t2 && t1 = idType) then typeInfer envWithRecFunc e2 else raise IncorretExpType
     | _ -> raise IncorretExpType
   )
   (* Application expression *)
@@ -88,7 +86,7 @@ let rec typeInfer (env: tyEnv) (e: exp) : expType =  match e with
     (let t1 = typeInfer env e1 in
       let t2 = typeInfer env e2 in 
         match t1 with 
-         | TyFunc(t1', t2') -> if (t1' == t2) then t2' else raise MismatchAppTypes
+         | TyFunc(t1', t2') -> if (t1' = t2) then t2' else raise MismatchAppTypes
          | _ -> raise IncorretExpType
     )
   (* Pair expressions *)
@@ -111,7 +109,7 @@ let rec typeInfer (env: tyEnv) (e: exp) : expType =  match e with
   | Nil(t) -> TyList(t)
   | Concat(e1,e2) ->
     (match (typeInfer env e1, typeInfer env e2) with
-      | (t1, TyList(t2)) -> if(t1 == t2) then TyList(t1) else raise IncorretExpType
+      | (t1, TyList(t2)) -> if(t1 = t2) then TyList(t1) else raise IncorretExpType
       | _ -> raise IncorretExpType
     )
   | Hd(e') -> 
@@ -120,11 +118,12 @@ let rec typeInfer (env: tyEnv) (e: exp) : expType =  match e with
       | _ -> raise IncorretExpType
     )
   | Tl(e') -> typeInfer env e'
-  | MatchList(e1, e2, e3,_,_) -> 
-      (match (typeInfer env e1, typeInfer env e2, typeInfer env e3) with
-        | (TyList(_), t1, t2) -> if (t1==t2) then t2 else raise IncorretExpType
-        | _ -> raise IncorretExpType
+  | MatchList(e1, e2, e3,x_ident,xs_ident) -> (match typeInfer env e1 with 
+     | TyList(x) ->
+      ( match (typeInfer env e2, typeInfer (updateEnv (updateEnv env x_ident x) xs_ident (typeInfer env e1)) e3) with
+        | (t1, t2) -> if (t1=t2) then t2 else raise MismatchMatchTypes
       )
+      | _ -> raise IncorretExpType)
   (* Option type expressions *)
   | Nothing(t) -> TyMaybe(t)
   | Just(e) -> 
@@ -132,6 +131,6 @@ let rec typeInfer (env: tyEnv) (e: exp) : expType =  match e with
      TyMaybe(t))
   | MatchOption(e1, e2, e3, _) ->
     (match (typeInfer env e1, typeInfer env e2, typeInfer env e3) with
-      | (TyMaybe(_), t1, t2) -> if (t1 == t2) then t2 else raise IncorretExpType
+      | (TyMaybe(_), t1, t2) -> if (t1 = t2) then t2 else raise IncorretExpType
       | _ -> raise IncorretExpType
     )

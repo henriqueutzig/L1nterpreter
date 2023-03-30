@@ -2,6 +2,8 @@ include OUnit2
 include Lib.Ops
 include Lib.TypeInfer
 include Lib.ToString
+include Lib.Eval
+include Lib.Execute
 
 (* include Lib.Expressions;; *)
 
@@ -70,6 +72,8 @@ let test_typeInfer name env exp (out : expType) =
       (toString result)
   in
   title >:: fun _ -> assert_equal out (typeInfer env exp)
+let test_typeInfer_Error name env exp  =
+  name >:: fun _ -> assert_raises IncorretExpType (fun _-> (typeInfer env exp)) 
 
 let typeInfer_tests =
   "typeInfer tests"
@@ -184,17 +188,521 @@ let typeInfer_tests =
                        (Var "x", Mult, App (Var "fat", Op (Var "x", Diff, Num 1)))
                    ),
                  App (Var "fat", Num 5) ))
-            TyInt
+            TyInt;
+            
+            test_typeInfer
+            "Test App"
+            [("lookup", TyFunc(TyList(TyPair(TyInt,TyInt)),TyMaybe(TyInt)));
+            ("xs",TyList(TyPair(TyInt,TyInt)))]
+                 ( App(Var "lookup", Var ("xs")))
+            (TyMaybe TyInt);
+            
+            test_typeInfer
+            "Test Nothing"
+            [("x",TyPair(TyInt,TyInt))]
+            (Nothing(TyInt))
+            (TyMaybe TyInt);
+
+            test_typeInfer 
+            "Test Inner part of let rec"
+            [("lookup", TyFunc(TyList(TyPair(TyInt,TyInt)),TyFunc(TyInt, TyMaybe(TyInt))));
+            ("l",TyList(TyPair(TyInt,TyInt)));
+            ("key",TyInt)]
+            (MatchList (
+                  Var "l",
+                  Nothing(TyInt),
+                  If(
+                    Op(Fst(Var "x"),Eq,Var "key"),
+                    Just(Snd(Var "x")),
+                    App(App(Var "lookup", Var ("xs")), Var "key")
+                    ),
+                  "x",
+                  "xs"
+            ))
+            (TyMaybe TyInt);
+
+            test_typeInfer 
+            "Test Fn"
+            [("lookup", TyFunc(TyList(TyPair(TyInt,TyInt)),TyFunc(TyInt, TyMaybe(TyInt))));
+            ("l",TyList(TyPair(TyInt,TyInt)));]
+            (Fn(
+              "key",
+              TyInt,
+              MatchList(
+                Var "l",
+                Nothing(TyInt),
+                If(
+                  Op(Fst(Var "x"),Eq,Var "key"),
+                  Just(Snd(Var "x")),
+                  App(App(Var "lookup", Var ("xs")), Var "key")
+                ),
+                "x",
+                "xs"
+            )))
+            (TyFunc(TyInt, TyMaybe TyInt));
+
+            test_typeInfer "Test Concat"
+            []
+                (Concat(
+                  Pair(Num 3, Num 30),Nil(TyPair(TyInt,TyInt))
+                  ))
+            (TyList (TyPair (TyInt, TyInt)));
+
+            test_typeInfer "Test Inner Application"
+            [("lookup", TyFunc(TyList(TyPair(TyInt,TyInt)),TyFunc(TyInt, TyMaybe(TyInt))))]
+            (App(App(Var "lookup",
+             Concat(
+                Pair(Num 1, Num 10), 
+                Concat(
+                  Pair(Num 2, Num 20), 
+                  Concat(
+                    Pair(Num 3, Num 30),Nil(TyPair(TyInt,TyInt))
+                    )
+                    )
+              )
+                ), Num 2 ))
+              (TyMaybe TyInt);
+
+
+            test_typeInfer 
+              "let rec lookup: (int x int) list -> int -> maybe int =
+                fn l: (int x int) list => fn key: int =>
+                    match l with
+                      nil => nothing
+                    | x :: xs => if (fst x) = key
+                                 then Just (snd x)
+                                 else (lookup xs key)
+            in lookup [(1,10),(2,20), (3,30)]  2"
+            []
+            (LetRec(
+              "lookup",
+              TyFunc(TyList(TyPair(TyInt,TyInt)),TyFunc(TyInt, TyMaybe(TyInt))),
+             "l",
+              TyList(TyPair(TyInt,TyInt)),
+              Fn(
+                "key",
+                TyInt,
+                MatchList(
+                  Var "l",
+                  Nothing(TyInt),
+                  If(
+                    Op(Fst(Var "x"),Eq,Var "key"),
+                    Just(Snd(Var "x")),
+                    App(App(Var "lookup", Var ("xs")), Var "key")
+                  ),
+                  "x",
+                  "xs"
+              )),
+              App(App(Var "lookup",Concat(
+                Pair(Num 1, Num 10), 
+                Concat(
+                  Pair(Num 2, Num 20), 
+                  Concat(
+                    Pair(Num 3, Num 30),Nil(TyPair(TyInt,TyInt))
+                    )
+                    )
+              )
+                ), Num 2 )
+            ))
+            (TyMaybe (TyInt));
+
+            test_typeInfer "Map App"
+            [("map",TyFunc(TyFunc(TyInt,TyInt),TyFunc(TyList(TyInt),TyList(TyInt)))); ("x",TyInt)]
+            (App(App(Var("map"),Fn("x",TyInt,Op(Var("x"),Sum,Var("x")))),Concat(Num(10),Concat(Num(20),Concat(Num(30),Nil(TyInt)))))            )
+            (TyList(TyInt));
+
+            test_typeInfer "App of function"
+            [("f",TyFunc(TyInt,TyInt));("xs",TyList(TyInt));("map",(TyFunc(TyFunc(TyInt,TyInt),TyFunc(TyList(TyInt),TyList(TyInt)))))]
+            (App(
+              App(Var("map"),Var("f")),
+              Var("xs")))
+            (TyList(TyInt));
+
+            test_typeInfer "App of function"
+            [("f",TyFunc(TyInt,TyInt));("x",TyInt);("xs",TyList(TyInt));("map",(TyFunc(TyFunc(TyInt,TyInt),TyFunc(TyList(TyInt),TyList(TyInt)))))]
+            (Concat(
+              App(Var("f"),Var("x")),
+              App(
+                App(Var("map"),Var("f")),
+                Var("xs"))))
+            (TyList(TyInt));
+
+            test_typeInfer "App of function"
+            [("f",TyFunc(TyInt,TyInt));("l",TyList(TyInt));("map",(TyFunc(TyFunc(TyInt,TyInt),TyFunc(TyList(TyInt),TyList(TyInt)))))]
+           (MatchList(
+            Var("l"),
+            Nil(TyInt),
+            Concat(
+              App(Var("f"),Var("x")),
+              App(
+                App(Var("map"),Var("f")),
+                Var("xs"))),
+            "x",
+            "xs"))
+            (TyList(TyInt));
+
+
+            test_typeInfer "Recursive map body"
+            [("f",TyFunc(TyInt,TyInt));
+            ("x",TyInt);
+            ("map",(TyFunc(TyFunc(TyInt,TyInt),TyFunc(TyList(TyInt),TyList(TyInt)))))]
+            (Fn(
+              "l",
+              TyList(TyInt),
+              MatchList(
+                Var("l"),
+                Nil(TyInt),
+                Concat(
+                  App(Var("f"),Var("x")),
+                  App(
+                    App(Var("map"),Var("f")),
+                    Var("xs"))),
+                "x",
+                "xs")
+              )
+            )
+            (TyFunc(TyList(TyInt),TyList(TyInt)));
+
+            test_typeInfer "Recursive pow - Inner If"
+            [("y",TyInt);("x",TyInt);("pow",TyFunc(TyInt,TyFunc(TyInt,TyInt)))]
+            (If(
+              (Op(Var("y"),Eq,Num(0))),
+              Num(1),
+              Op(Var("x"),Mult,App(
+                App(Var("pow"),Var("x")),
+                Op(Var("y"),Diff,Num(1))
+                ))))
+            (TyInt);
+
+            test_typeInfer "Recursive pow - Function Body"
+            [("x",TyInt);("pow",TyFunc(TyInt,TyFunc(TyInt,TyInt)))]
+            (Fn(
+              "y",
+              TyInt,
+              If(
+                (Op(Var("y"),Eq,Num(0))),
+                Num(1),
+                Op(Var("x"),Mult,App(
+                  App(Var("pow"),Var("x")),
+                  Op(Var("y"),Diff,Num(1))
+                  ))
+              )))
+            (TyFunc(TyInt,TyInt));
+
+            test_typeInfer "Recursive pow - App"
+            [("pow",  TyFunc(TyInt,TyFunc(TyInt,TyInt)))]
+            (App(App(Var("pow"),Num(3)),Num(4)))
+            (TyInt);
+
+
+
+            (* Testes de Erro no TypeInfer *)
+            test_typeInfer_Error "10::20::30"
+            []
+            (Concat(Num(10), Concat(Num(20), Num(30))));
+            test_typeInfer_Error "if 1 then true else false"
+            []
+            (If (Num 1,Bool true, Bool false));
+            test_typeInfer_Error "if true then 1 else false"
+            []
+            (If (Bool true,Num 1, Bool false));
+            test_typeInfer_Error "true + 2"
+            []
+            (Op (Bool true,Sum, Num 2));
+            test_typeInfer_Error "true and 2"
+            []
+            (Op (Bool true,And, Num 2));
+            test_typeInfer_Error "Pair(true,2+true)"
+            []
+            (Pair (Bool true, Op (Num 2, Sum, Bool true)));
+            test_typeInfer_Error "Fst(List(2::nil)"
+            []
+            (Fst (Concat(Num 2, Nil TyInt)));
+            test_typeInfer_Error "Hd(Pair(1,2))"
+            []
+            (Hd (Pair(Num 1, Num 2)));
+          
+
+(* 
+            test_typeInfer_Error "fn x: int => x + y "
+            []
+            (Fn ("x", TyInt, Op(Var "x", Sum, Var "y"))); *)
          (*test_typeInfer "" (*nome do teste *)
                        [] (* ambiente de test *)
                        () (* expressão a ser testada*)
                        ();(* tipo esperado*) *)
        ]
 
+
+(* ********EVAL******** *)
+let test_eval name env exp (out : value) =
+  let result = eval env exp in
+  let title = name
+  in
+  title >:: fun _ -> assert_equal out result
+
+  let test_eval_error name env exp  =
+  name >:: fun _ -> assert_raises IncorrectExpresionType (fun _-> (eval env exp)) 
+
+
+let eval_tests =
+  "eval tests"
+  >::: [
+         test_eval "Num(10)" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Num(10)) (* expressão a ser testada*)
+                       (Numeric(10));(* tipo esperado*) 
+          test_eval "Num(-102)" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Num(-102)) (* expressão a ser testada*)
+                       (Numeric(-102));(* tipo esperado*) 
+          test_eval "Bool(true)" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Bool(true)) (* expressão a ser testada*)
+                       (Boolean(true));(* tipo esperado*) 
+          test_eval "Bool(false))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Bool(false)) (* expressão a ser testada*)
+                       (Boolean(false));(* tipo esperado*)
+          test_eval "Var(x) = 10" (*nome do teste *)
+                       [("x", Numeric(10))] (* ambiente de test *)
+                       (Var("x")) (* expressão a ser testada*)
+                       (Numeric(10));(* tipo esperado*)
+          test_eval "Var(x) = false" (*nome do teste *)
+                       [("x", Boolean(false))] (* ambiente de test *)
+                       (Var("x")) (* expressão a ser testada*)
+                       (Boolean(false));(* tipo esperado*)  
+          test_eval "(Numeric(10) Sum Numeric(-2))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Op(Num(10), Sum, Num(-2))) (* expressão a ser testada*)
+                       (Numeric(8));(* tipo esperado*) 
+          test_eval "(Numeric(5) Diff Numeric(3))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Op(Num(5), Diff, Num(3))) (* expressão a ser testada*)
+                       (Numeric(2));(* tipo esperado*) 
+          test_eval "(Numeric(2) Mult Numeric(8))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Op(Num(2), Mult, Num(8))) (* expressão a ser testada*)
+                       (Numeric(16));(* tipo esperado*) 
+          test_eval "(Numeric(50) Div Numeric(5))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Op(Num(50), Div, Num(5))) (* expressão a ser testada*)
+                       (Numeric(10));(* tipo esperado*) 
+          test_eval "(Numeric(7) Eq Numeric(49))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Op(Num(7), Eq, Num(49))) (* expressão a ser testada*)
+                       (Boolean(false));(* tipo esperado*) 
+          test_eval "(Numeric(7) Eq Numeric(7))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Op(Num(7), Eq, Num(7))) (* expressão a ser testada*)
+                       (Boolean(true));(* tipo esperado*) 
+          test_eval "(Numeric(7) Less Numeric(49))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Op(Num(7), Less, Num(49))) (* expressão a ser testada*)
+                       (Boolean(true));(* tipo esperado*) 
+          test_eval "(Numeric(7) Less Numeric(6))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Op(Num(7), Less, Num(6))) (* expressão a ser testada*)
+                       (Boolean(false));(* tipo esperado*) 
+          test_eval "(Numeric(7) Leq Numeric(7))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Op(Num(7), Leq, Num(7))) (* expressão a ser testada*)
+                       (Boolean(true));(* tipo esperado*) 
+          test_eval "(Numeric(7) Leq Numeric(6))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Op(Num(7), Leq, Num(6))) (* expressão a ser testada*)
+                       (Boolean(false));(* tipo esperado*) 
+          test_eval "(Numeric(49) Greater Numeric(7))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Op(Num(49), Greater, Num(7))) (* expressão a ser testada*)
+                       (Boolean(true));(* tipo esperado*) 
+          test_eval "(Numeric(7) Greater Numeric(49))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Op(Num(7), Greater, Num(49))) (* expressão a ser testada*)
+                       (Boolean(false));(* tipo esperado*) 
+          test_eval "(Numeric(7) Geq Numeric(7))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Op(Num(7), Geq, Num(7))) (* expressão a ser testada*)
+                       (Boolean(true));(* tipo esperado*) 
+          test_eval "(Numeric(7) Geq Numeric(8))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Op(Num(7), Geq, Num(8))) (* expressão a ser testada*)
+                       (Boolean(false));(* tipo esperado*) 
+          test_eval "(Boolean(true) opAnd Boolean(true))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Op(Bool(true), And, Bool(true))) (* expressão a ser testada*)
+                       (Boolean(true));(* tipo esperado*) 
+          test_eval "(Boolean(true) opAnd Boolean(false))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Op(Bool(true), And, Bool(false))) (* expressão a ser testada*)
+                       (Boolean(false));(* tipo esperado*)
+          test_eval "(Boolean(false) opOr Boolean(false))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Op(Bool(false), Or, Bool(false))) (* expressão a ser testada*)
+                       (Boolean(false));(* tipo esperado*) 
+          test_eval "(Boolean(false) opAnd Boolean(true))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Op(Bool(false), Or, Bool(true))) (* expressão a ser testada*)
+                       (Boolean(true));(* tipo esperado*)
+          test_eval "(If Boolean(true) then Num(1) else Num(0))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (If(Bool(true), Num(1), Num(0))) (* expressão a ser testada*)
+                       (Numeric(1));(* tipo esperado*)
+          test_eval "(If Boolean(false) then Num(1) else Num(0))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (If(Bool(false), Num(1), Num(0))) (* expressão a ser testada*)
+                       (Numeric(0));(* tipo esperado*)
+          test_eval "(Just (If Boolean(false) then Num(1) else Num(0)))" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Just(If(Bool(false), Num(1), Num(0)))) (* expressão a ser testada*)
+                       (Just(Numeric(0)));(* tipo esperado*)
+          test_eval "Nothing Int" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Nothing TyInt) (* expressão a ser testada*)
+                       (Nothing TyInt);(* tipo esperado*)
+          test_eval "match Noting int with nothing => Num(0) | just x => x+10"
+                       []
+                       (MatchOption(Nothing(TyInt), Num(0), Op(Var("x"), Sum, Num(10)), "x"))
+                       (Numeric(0));
+          test_eval "match Just(2) with nothing => Num(0) | just x => x+10"
+                       []
+                       (MatchOption(Just(Num(2)), Num(0), Op(Var("x"), Sum, Num(10)), "x"))
+                       (Numeric(12));
+          test_eval "Let x:int = 10 in -5 + x" (*nome do teste *)
+                       [] (* ambiente de test *)
+                       (Let("x", TyInt, Num(10), Op(Num(-5), Sum, Var("x")))) (* expressão a ser testada*)
+                       (Numeric(5));(* tipo esperado*)
+          test_eval "Let x:bool = false in y or x" (*nome do teste *)
+                       [("y", Boolean(true))] (* ambiente de test *)
+                       (Let("x", TyBool, Bool(false), Op(Var("y"), Or, Var("x")))) (* expressão a ser testada*)
+                       (Boolean(true));(* tipo esperado*)
+          test_eval "Let x:bool = false in (y <= z) and x" (*nome do teste *)
+                       [("y", Numeric(10)); ("z", Numeric(12))] (* ambiente de test *)
+                       (Let("x", TyBool, Bool(true), Op((Op(Var("y"), Leq, Var("z"))), And, Var("x")))) (* expressão a ser testada*)
+                       (Boolean(true));(* tipo esperado*)
+          test_eval "fn x:Int = 10+x -> <x, 10+x, env>" (* nome do teste *)
+                       [] (* ambiente de test *)
+                       (Fn ("x", TyInt, Op (Num 10, Sum, Var "x")))
+                       (* expressão a ser testada*)
+                       ((Closure("x", Op (Num 10, Sum, Var "x"), [])));
+          test_eval "f(x,y) = x+y"
+                       [ ("x", Numeric(10)); ("y", Numeric(2))]
+                       (Fn ("x", TyInt, Fn ("y", TyInt, Op (Num 3, Sum, Num 4))))
+                       (Closure("x", Fn ("y", TyInt, Op (Num 3, Sum, Num 4)), [ ("x", Numeric(10)); ("y", Numeric(2))]));
+          test_eval "let rec fat: int -> int = fn x: int => if(x==1, 1, x * fat (x-1))"
+                       []
+                       (LetRec("fat", TyFunc(TyInt, TyInt), "x", TyInt,
+                          If(Op(Var("x"), Eq, Num(1)),
+                              Num(1),
+                              Op(Var "x", Mult, App(Var("fat"), Op(Var("x"), Diff, Num(1))))
+                          ),
+                          App(Var("fat"), Num(3))
+                       ))
+                       (Numeric(6));
+          test_eval "(fn x:Int => x+y) 12"
+                       [("y", Numeric(2))]
+                       (App(Fn ("x", TyInt, Op (Var("x"), Sum, Var("y"))), Num(12)))
+                       (Numeric(14));
+          test_eval "(If Boolean(true) then Num(1) else Num(0), If Boolean(false) then Num(1) else Num(0))"
+                       []
+                       (Pair(If(Bool(true), Num(1), Num(0)), If(Bool(false), Num(1), Num(0))))
+                       (Pair(Numeric(1), Numeric(0)));
+          test_eval "fst (If Boolean(true) then Num(1) else Num(0), If Boolean(false) then Num(1) else Num(0))"
+                       []
+                       (Fst(Pair(If(Bool(true), Num(1), Num(0)), If(Bool(false), Num(1), Num(0)))))
+                       (Numeric(1));
+          test_eval "snd (If Boolean(true) then Num(1) else Num(0), If Boolean(false) then Num(1) else Num(0))"
+                       []
+                       (Snd(Pair(If(Bool(true), Num(1), Num(0)), If(Bool(false), Num(1), Num(0)))))
+                       (Numeric(0));
+          test_eval "Nil(int)"
+                       []
+                       (Nil(TyInt))
+                       (Nil(TyInt));
+          (* WARNNING: following tests show possible problem *)
+          test_eval "10::20::30::nil"
+                       []
+                       (Concat(Num(10), Concat(Num(20), Concat(Num(30), Nil(TyInt)))))
+                       (List(Numeric(10), List(Numeric(20), List(Numeric(30), Nil(TyInt)))));
+          test_eval "10::20::30"
+                       []
+                       (Concat(Num(10), Concat(Num(20), Num(30))))
+                       (List(Numeric(10), List(Numeric(20), Numeric(30))));
+          (* ^^^^^^^^^^^^ *)
+          test_eval "Hd(10::20::30::nil)"
+                       []
+                       (Hd(Concat(Num(10), Concat(Num(20), Concat(Num(30), Nil(TyInt))))))
+                       (Numeric(10));
+          test_eval "Tl(10::20::30::nil)"
+                       []
+                       (Tl(Concat(Num(10), Concat(Num(20), Concat(Num(30), Nil(TyInt))))))
+                       (List(Numeric(20), List(Numeric(30), Nil(TyInt))));
+          test_eval "Tl(10::nil)"
+                       []
+                       (Tl(Concat(Num(10), Nil(TyInt))))
+                       (Nil(TyInt));
+          test_eval "Match Tl(10::nil) with Nil => -1 | x::xs => x"
+                       []
+                       (MatchList(Tl(Concat(Num(10), Nil(TyInt))), Num(-1), Var("X"), "x", "xs"))
+                       (Numeric(-1));  
+          test_eval "Match (10::nil) with Nil => -1 | x::xs => x"
+                       []
+                       (MatchList(Concat(Num(10), Nil(TyInt)), Num(-1), Var("x"), "x", "xs"))
+                       (Numeric(10));
+          test_eval "Match (10::nil) with Nil => -1 | x::xs => xs"
+                       []
+                       (MatchList((Concat(Num(10), Nil(TyInt))), Num(-1), Var("xs"), "x", "xs"))
+                       (Nil(TyInt));
+          test_eval ""
+          []
+          (
+            LetRec(
+            "lookup",
+            TyFunc(TyList(TyPair(TyInt,TyInt)),TyFunc(TyInt, TyMaybe(TyInt))),
+           "l",
+            TyList(TyPair(TyInt,TyInt)),
+            Fn(
+              "key",
+              TyInt,
+              MatchList(
+                Var "l",
+                Nothing(TyInt),
+                If(
+                  Op(Fst(Var "x"),Eq,Var "key"),
+                  Just(Snd(Var "x")),
+                  App(App(Var "lookup", Var ("xs")), Var "key")
+                ),
+                "x",
+                "xs"
+            )),
+            App(App(Var "lookup",Concat(
+              Pair(Num 1, Num 10), 
+              Concat(
+                Pair(Num 2, Num 20), 
+                Concat(
+                  Pair(Num 3, Num 30),Nil(TyPair(TyInt,TyInt))
+                  )
+                  )
+            )
+              ), Num 2 )))
+          (Just(Numeric(20)));
+
+          test_eval_error "If 2 then 2 else 4 | TypeInfer deve pegar"
+          []
+          (If (Num 2, Num 2, Num 4));
+          test_eval_error "MatchOption Num1, Num2, Num3 | TypeInfer deve pegar"
+          []
+          (MatchOption (Num 2, Num 3, Num 4, "x")) ;              
+          ]
+
+
+
+
+
 (********************
     TODO: add every new test list into suite's list
   *************************)
 (* Name the test cases and group them together *)
-let suite = "Tests" >::: [ sum_tests; diff_tests; mult_tests; typeInfer_tests ]
+let suite = "Tests" >::: [ sum_tests; diff_tests; mult_tests; typeInfer_tests; eval_tests ]
 let () = run_test_tt_main suite
 (* run_test_tt_main  *)

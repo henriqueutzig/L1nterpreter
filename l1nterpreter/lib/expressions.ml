@@ -49,12 +49,13 @@ type exp =
   | MatchOption of exp * exp * exp * ident (* TODO:  match e1 with nothing ⇒ e2 | just x ⇒ e3 *)
 
 
-
+(* ((ident * value) list) == valEnv *)
 type value = 
   | Numeric of int
   | Boolean of bool
-  | Closure of ident * exp * tyEnv
-  | RecClosure of ident * ident * exp * tyEnv
+  | Closure of ident * exp * ((ident * value) list)
+  | RecClosure of ident * ident * exp * ((ident * value) list)
+  | Pair   of value * value
   | Nil of expType
   | List of value * value
   | Nothing of expType
