@@ -15,7 +15,9 @@ in
 try 
 let result = eval [] expression in
 let () = print_string "Result of eval is: " in
-let () = print_endline (valueToString result) in result
+let () = print_endline (valueToString result) in
+let () = print_endline ""
+in result
 with 
 | _  -> let () = print_endline "Error in eval step" in raise EvalError
 with 
