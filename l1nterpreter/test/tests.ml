@@ -438,8 +438,6 @@ let typeInfer_tests =
 let test_eval name env exp (out : value) =
   let result = eval env exp in
   let title = name
-    (* Printf.sprintf "%s: Assert %s is equal to %s" name (toString out)
-      (toString result) *)
   in
   title >:: fun _ -> assert_equal out result
 
