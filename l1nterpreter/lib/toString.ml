@@ -50,3 +50,19 @@ let rec expToString (exp:exp):string = match exp with
   | Nothing(_) -> Printf.sprintf "Nothing"
   | MatchOption(e1,e2,e3,x) -> Printf.sprintf "match %s with nothing => %s | Just(%s) => %s" (expToString e1) (expToString e2) x  (expToString e3)
 
+
+  let rec valueToString v =
+    match v with
+    | Numeric n -> Printf.sprintf "%d" n
+    | Boolean b -> Printf.sprintf "%b" b
+    | Closure (param, body, env) ->
+        let env_str = List.map (fun (id, v) -> Printf.sprintf "%s = %s" id (valueToString v)) env in
+        Printf.sprintf "fun %s -> %s [%s]" param (expToString body) (String.concat ", " env_str)
+    | RecClosure (fparam, param, body, env) ->
+        let env_str = List.map (fun (id, v) -> Printf.sprintf "%s = %s" id (valueToString v)) env in
+        Printf.sprintf "recfun %s %s -> %s [%s]" fparam param (expToString body) (String.concat ", " env_str)
+    | Pair (v1, v2) -> Printf.sprintf "(%s, %s)" (valueToString v1) (valueToString v2)
+    | Nil _ -> "[]"
+    | List (v1, v2) -> Printf.sprintf "[%s, %s]" (valueToString v1) (valueToString v2)
+    | Nothing _ -> "nothing"
+    | Just v -> Printf.sprintf "just %s" (valueToString v)
