@@ -5,6 +5,7 @@ exception EvalError;;
 exception TypeInferError;;
 
 let run (expression:exp) : value  =
+  let () = print_string "Expression " in
   let () = print_endline (expToString expression) in 
   try 
   let exp_type = typeInfer [] expression in
