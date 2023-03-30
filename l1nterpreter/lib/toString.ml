@@ -13,7 +13,17 @@ let rec toString (exp:expType):string = match exp with
 
 
 let  opToString (operation:op):string = match operation with 
-| _ -> Printf.sprintf "Not implemented yet"
+| Sum -> Printf.sprintf "+"
+| Diff -> Printf.sprintf "!="
+| Eq -> Printf.sprintf "=="
+| Less -> Printf.sprintf "<"
+| Mult -> Printf.sprintf "*"
+| Div -> Printf.sprintf "/"
+| Leq -> Printf.sprintf "<="
+| Greater -> Printf.sprintf ">"
+| Geq -> Printf.sprintf ">="
+| And -> Printf.sprintf "&&"
+| Or -> Printf.sprintf "||"
 
 
 
