@@ -39,10 +39,10 @@ run ( (
     ), Num 2 ))));;
 
 
-    (* let x:int = 2 in
-let foo: int --> int = fn y:int => x + y in
-let x: int = 5
-in   foo 10 *)
+(* let x:int = 2 in
+  let foo: int --> int = fn y:int => x + y in
+   let x: int = 5
+   in foo 10 *)
     run(
       Let("x",TyInt,Num(2),
         Let("foo",TyFunc(TyInt,TyInt),
