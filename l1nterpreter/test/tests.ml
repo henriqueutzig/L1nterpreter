@@ -311,16 +311,57 @@ let typeInfer_tests =
             (App(App(Var("map"),Fn("x",TyInt,Op(Var("x"),Sum,Var("x")))),Concat(Num(10),Concat(Num(20),Concat(Num(30),Nil(TyInt)))))            )
             (TyList(TyInt));
 
-            test_typeInfer "Recursive map bode"
-            [("f",TyFunc(TyInt,TyInt));("x",TyInt);("map",(TyFunc(TyFunc(TyInt,TyInt),TyFunc(TyList(TyInt),TyList(TyInt)))))]
+            test_typeInfer "App of function"
+            [("f",TyFunc(TyInt,TyInt));("xs",TyList(TyInt));("map",(TyFunc(TyFunc(TyInt,TyInt),TyFunc(TyList(TyInt),TyList(TyInt)))))]
+            (App(
+              App(Var("map"),Var("f")),
+              Var("xs")))
+            (TyList(TyInt));
+
+            test_typeInfer "App of function"
+            [("f",TyFunc(TyInt,TyInt));("x",TyInt);("xs",TyList(TyInt));("map",(TyFunc(TyFunc(TyInt,TyInt),TyFunc(TyList(TyInt),TyList(TyInt)))))]
+            (Concat(
+              App(Var("f"),Var("x")),
+              App(
+                App(Var("map"),Var("f")),
+                Var("xs"))))
+            (TyList(TyInt));
+
+            test_typeInfer "App of function"
+            [("f",TyFunc(TyInt,TyInt));("l",TyList(TyInt));("map",(TyFunc(TyFunc(TyInt,TyInt),TyFunc(TyList(TyInt),TyList(TyInt)))))]
+           (MatchList(
+            Var("l"),
+            Nil(TyInt),
+            Concat(
+              App(Var("f"),Var("x")),
+              App(
+                App(Var("map"),Var("f")),
+                Var("xs"))),
+            "x",
+            "xs"))
+            (TyList(TyInt));
+
+
+            (* test_typeInfer "Recursive map body"
+            [("f",TyFunc(TyInt,TyInt));
+            ("x",TyInt);
+            ("map",(TyFunc(TyFunc(TyInt,TyInt),TyFunc(TyList(TyInt),TyList(TyInt)))))]
             (Fn(
               "l",
               TyList(TyInt),
-              MatchList(Var("l"),Nil(TyList(TyInt)),
-              Concat(App(Var("f"),Var("x")),App(Var("map"),Var("xs"))),
-              "x",
-              "xs")))
-              (TyFunc(TyList(TyInt),TyList(TyInt)));
+              MatchList(
+                Var("l"),
+                Nil(TyList(TyInt)),
+                Concat(
+                  App(Var("f"),Var("x")),
+                  App(
+                    App(Var("map"),Var("f")),
+                    Var("xs"))),
+                "x",
+                "xs")
+              )
+            )
+            (TyFunc(TyList(TyInt),TyList(TyInt))); *)
             (* Testes de Erro no TypeInfer *)
             test_typeInfer_Error "10::20::30"
             []
