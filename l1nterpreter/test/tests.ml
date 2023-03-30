@@ -391,7 +391,7 @@ let typeInfer_tests =
 
             test_typeInfer "Recursive pow - App"
             [("pow",  TyFunc(TyInt,TyFunc(TyInt,TyInt)))]
-            (App(App(Var("Pow"),Num(3)),Num(4)))
+            (App(App(Var("pow"),Num(3)),Num(4)))
             (TyInt);
 
 
