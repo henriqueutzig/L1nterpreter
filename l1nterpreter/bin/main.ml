@@ -62,12 +62,19 @@ in   foo 10 *)
       "f",
       TyFunc(TyInt,TyInt),
       Fn(
-        "l",
-        TyList(TyInt),
-        MatchList(Var("l"),Nil(TyList(TyInt)),
-        Concat(App(Var("f"),Var("x")),App(Var("map"),Var("xs"))),
-        "x",
-        "xs")),
+              "l",
+              TyList(TyInt),
+              MatchList(
+                Var("l"),
+                Nil(TyInt),
+                Concat(
+                  App(Var("f"),Var("x")),
+                  App(
+                    App(Var("map"),Var("f")),
+                    Var("xs"))),
+                "x",
+                "xs")
+              ),
         App(App(Var("map"),Fn("x",TyInt,Op(Var("x"),Sum,Var("x")))),Concat(Num(10),Concat(Num(20),Concat(Num(30),Nil(TyInt)))))
         )
     )

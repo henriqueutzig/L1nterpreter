@@ -342,7 +342,7 @@ let typeInfer_tests =
             (TyList(TyInt));
 
 
-            (* test_typeInfer "Recursive map body"
+            test_typeInfer "Recursive map body"
             [("f",TyFunc(TyInt,TyInt));
             ("x",TyInt);
             ("map",(TyFunc(TyFunc(TyInt,TyInt),TyFunc(TyList(TyInt),TyList(TyInt)))))]
@@ -351,7 +351,7 @@ let typeInfer_tests =
               TyList(TyInt),
               MatchList(
                 Var("l"),
-                Nil(TyList(TyInt)),
+                Nil(TyInt),
                 Concat(
                   App(Var("f"),Var("x")),
                   App(
@@ -361,7 +361,7 @@ let typeInfer_tests =
                 "xs")
               )
             )
-            (TyFunc(TyList(TyInt),TyList(TyInt))); *)
+            (TyFunc(TyList(TyInt),TyList(TyInt)));
             (* Testes de Erro no TypeInfer *)
             test_typeInfer_Error "10::20::30"
             []
