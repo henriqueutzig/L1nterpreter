@@ -362,6 +362,40 @@ let typeInfer_tests =
               )
             )
             (TyFunc(TyList(TyInt),TyList(TyInt)));
+
+            test_typeInfer "Recursive pow - Inner If"
+            [("y",TyInt);("x",TyInt);("pow",TyFunc(TyInt,TyFunc(TyInt,TyInt)))]
+            (If(
+              (Op(Var("y"),Eq,Num(0))),
+              Num(1),
+              Op(Var("x"),Mult,App(
+                App(Var("pow"),Var("x")),
+                Op(Var("y"),Diff,Num(1))
+                ))))
+            (TyInt);
+
+            test_typeInfer "Recursive pow - Function Body"
+            [("x",TyInt);("pow",TyFunc(TyInt,TyFunc(TyInt,TyInt)))]
+            (Fn(
+              "y",
+              TyInt,
+              If(
+                (Op(Var("y"),Eq,Num(0))),
+                Num(1),
+                Op(Var("x"),Mult,App(
+                  App(Var("pow"),Var("x")),
+                  Op(Var("y"),Diff,Num(1))
+                  ))
+              )))
+            (TyFunc(TyInt,TyInt));
+
+            test_typeInfer "Recursive pow - App"
+            [("pow",  TyFunc(TyInt,TyFunc(TyInt,TyInt)))]
+            (App(App(Var("Pow"),Num(3)),Num(4)))
+            (TyInt);
+
+
+
             (* Testes de Erro no TypeInfer *)
             test_typeInfer_Error "10::20::30"
             []

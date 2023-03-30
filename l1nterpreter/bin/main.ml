@@ -78,4 +78,24 @@ in   foo 10 *)
               ),
         App(App(Var("map"),Fn("x",TyInt,Op(Var("x"),Sum,Var("x")))),Concat(Num(10),Concat(Num(20),Concat(Num(30),Nil(TyInt)))))
         )
-    )
+    );;
+
+run(LetRec(
+  "pow",
+  TyFunc(TyInt,TyFunc(TyInt,TyInt)),
+  "x",
+  TyInt,
+  Fn(
+    "y",
+    TyInt,
+    If(
+      (Op(Var("y"),Eq,Num(0))),
+      Num(1),
+      Op(Var("x"),Mult,App(
+        App(Var("pow"),Var("x")),
+        Op(Var("y"),Diff,Num(1))
+        ))
+    )),
+    App(App(Var("pow"),Num(3)),Num(4))
+  )
+);;
